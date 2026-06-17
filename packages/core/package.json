@@ -5,6 +5,9 @@
   "main": "./dist/omniconsole.umd.js",
   "module": "./dist/omniconsole.mjs",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": "./dist/omniconsole.mjs",
