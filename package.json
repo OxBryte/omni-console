@@ -1,0 +1,13 @@
+{
+  "name": "omniconsole-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "demo"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev --workspace=demo",
+    "clean": "rm -rf node_modules packages/*/node_modules demo/node_modules packages/*/dist demo/dist"
+  }
+}

@@ -1,0 +1,1124 @@
+import { useState, useEffect } from 'react';
+
+const SCRIPT_PRESETS = {
+  auth: `// AuthManager.ts - OAuth2 Authentication Flow
+async function authenticateUser() {
+  console.info("AuthManager: Requesting token exchange...");
+  
+  const response = await fetch("https://api.omnishop.io/v1/auth/token", {
+    method: "POST",
+    body: JSON.stringify({ grant_type: "client_credentials" })
+  });
+  
+  if (response.status === 200) {
+    console.log("AuthManager: Token exchanged successfully.");
+    document.cookie = "session_user=apple_developer_tier; path=/";
+    console.log("AuthManager: Session credentials cached.");
+  }
+}`,
+  checkout: `// CheckoutService.ts - Payment Transaction
+function processPayment() {
+  console.log("CheckoutService: Starting transaction check...");
+  
+  fetch("https://api.omnishop.io/v1/checkout/verify");
+  console.warn("CheckoutService: Legacy payment API is deprecated.");
+  
+  try {
+    throw new Error("PaymentGatewayException: Connection timeout.");
+  } catch (err) {
+    console.error("CheckoutService: Checkout transaction failed.", err);
+  }
+}`,
+  benchmark: `// Performance.ts - Virtual List Stress Test
+function runBenchmark(limit) {
+  console.log("Benchmark: List virtualization stress test initiated.");
+  
+  for (let i = 1; i <= limit; i++) {
+    console.log(\`Virtualized log row #\${i} - scroll latency test.\`);
+  }
+  
+  console.info("Benchmark: Stress test loop finished.");
+}`
+};
+
+interface WorkbenchEvent {
+  type: 'CONSOLE' | 'NETWORK' | 'STORAGE' | 'SYSTEM' | 'ERROR';
+  msg: string;
+  time: string;
+  status: 'active' | 'success' | 'warning' | 'error';
+}
+
+export default function PlaygroundView() {
+  // Playground state variables
+  const [storageKey, setStorageKey] = useState('username');
+  const [storageVal, setStorageVal] = useState('alex_dev');
+  const [stressLogCount, setStressLogCount] = useState(1000);
+
+  // Active workbench diagnostics state
+  const [totalLogCount, setTotalLogCount] = useState(14);
+  const [networkRequestCount, setNetworkRequestCount] = useState(5);
+  const [storageCount, setStorageCount] = useState(4);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  
+  // Telemetry Metrics
+  const [cpuMetric, setCpuMetric] = useState(2.4);
+  const [memoryMetric, setMemoryMetric] = useState(24.8);
+  const [fpsMetric, setFpsMetric] = useState(60);
+  const [fpsHistory, setFpsHistory] = useState<number[]>(Array(30).fill(60));
+  
+  // Simulation script state
+  const [selectedScript, setSelectedScript] = useState<'auth' | 'checkout' | 'benchmark'>('auth');
+  const [scriptRunning, setScriptRunning] = useState(false);
+  const [scriptProgress, setScriptProgress] = useState(0);
+  
+  // Custom API Test States
+  const [apiPath, setApiPath] = useState('/v1/products/studio-display');
+  const [apiMethod, setApiMethod] = useState<'GET' | 'POST' | 'PUT' | 'DELETE'>('GET');
+  const [apiLatency, setApiLatency] = useState(120);
+  const [apiStatus, setApiStatus] = useState<number>(200);
+  const [apiPayload, setApiPayload] = useState('{\n  "inStock": true,\n  "quantity": 12\n}');
+  const [apiSending, setApiSending] = useState(false);
+  
+  // Storage Sandbox Tab
+  const [sandboxStorageTab, setSandboxStorageTab] = useState<'cookies' | 'local' | 'session'>('local');
+  const [sandboxCookies, setSandboxCookies] = useState<{ key: string; value: string }[]>([]);
+  const [sandboxLocal, setSandboxLocal] = useState<{ key: string; value: string }[]>([]);
+  const [sandboxSession, setSandboxSession] = useState<{ key: string; value: string }[]>([]);
+  
+  // Event Feed for the active workbench
+  const [workbenchEvents, setWorkbenchEvents] = useState<WorkbenchEvent[]>([
+    { type: 'SYSTEM', msg: 'Developer Lab Simulator Initialized.', time: '13:08:00', status: 'active' },
+    { type: 'CONSOLE', msg: 'Core interceptor bound to window console.', time: '13:08:01', status: 'success' }
+  ]);
+
+  // Sync sandbox state
+  const syncSandboxStorage = () => {
+    const local: { key: string; value: string }[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && !key.startsWith('__')) {
+        local.push({ key, value: localStorage.getItem(key) || '' });
+      }
+    }
+    setSandboxLocal(local);
+
+    const session: { key: string; value: string }[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key) {
+        session.push({ key, value: sessionStorage.getItem(key) || '' });
+      }
+    }
+    setSandboxSession(session);
+
+    const cookies: { key: string; value: string }[] = [];
+    document.cookie.split(';').forEach(c => {
+      const parts = c.split('=');
+      const name = parts[0]?.trim();
+      const val = parts[1]?.trim();
+      if (name) {
+        cookies.push({ key: name, value: decodeURIComponent(val || '') });
+      }
+    });
+    setSandboxCookies(cookies);
+    
+    setStorageCount(local.length + session.length + cookies.length);
+  };
+
+  // Sync on mount
+  useEffect(() => {
+    syncSandboxStorage();
+  }, []);
+
+  // Ambient telemetry loop
+  useEffect(() => {
+    const elapsedInterval = setInterval(() => {
+      setElapsedTime(prev => prev + 1);
+    }, 1000);
+    
+    const metricsInterval = setInterval(() => {
+      setCpuMetric(prev => {
+        if (prev > 8) return Number((prev - (prev - 2.5) * 0.15).toFixed(1));
+        return Number((1.5 + Math.random() * 3).toFixed(1));
+      });
+      
+      setMemoryMetric(prev => {
+        if (prev > 30) return Number((prev - (prev - 24.8) * 0.1).toFixed(1));
+        return Number((24.2 + Math.random() * 1.5).toFixed(1));
+      });
+      
+      setFpsMetric(prev => {
+        if (prev < 59) return Math.min(60, prev + Math.floor(Math.random() * 2) + 1);
+        return 60;
+      });
+    }, 1000);
+    
+    return () => {
+      clearInterval(elapsedInterval);
+      clearInterval(metricsInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    setFpsHistory(prev => [...prev.slice(1), fpsMetric]);
+  }, [fpsMetric]);
+
+  const addWorkbenchEvent = (type: WorkbenchEvent['type'], msg: string, status: WorkbenchEvent['status']) => {
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    setWorkbenchEvents(prev => [
+      { type, msg, time: timeStr, status },
+      ...prev.slice(0, 19)
+    ]);
+  };
+
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+  };
+
+  // Preset Script executors
+  const runSelectedScript = () => {
+    if (scriptRunning) return;
+    setScriptRunning(true);
+    setScriptProgress(0);
+    
+    if (selectedScript === 'auth') {
+      addWorkbenchEvent('SYSTEM', 'Running Authenticate Flow script...', 'active');
+      setCpuMetric(14.8);
+      
+      setTimeout(() => {
+        setScriptProgress(25);
+        console.info("AuthManager: Requesting token exchange via OAuth2...");
+        addWorkbenchEvent('CONSOLE', 'info: AuthManager: Requesting token exchange...', 'active');
+        setTotalLogCount(prev => prev + 1);
+      }, 600);
+      
+      setTimeout(() => {
+        setScriptProgress(50);
+        setCpuMetric(24.5);
+        setMemoryMetric(26.2);
+        
+        fetch('https://jsonplaceholder.typicode.com/posts/1')
+          .then(r => r.json())
+          .then(() => {
+            console.log("AuthManager: Token exchanged successfully. Session response ok.", {
+              token_type: "Bearer",
+              expires_in: 3600,
+              user_id: 89402,
+              roles: ["developer"]
+            });
+            addWorkbenchEvent('NETWORK', 'POST /v1/auth/token - 200 OK (32ms)', 'success');
+            addWorkbenchEvent('CONSOLE', 'log: AuthManager: Token exchanged successfully.', 'success');
+            setTotalLogCount(prev => prev + 1);
+            setNetworkRequestCount(prev => prev + 1);
+          });
+      }, 1200);
+      
+      setTimeout(() => {
+        setScriptProgress(75);
+        setCpuMetric(18.2);
+        document.cookie = "session_user=apple_developer_tier; path=/";
+        console.log("AuthManager: Credentials cached. Storage cookie 'session_user' set.");
+        addWorkbenchEvent('STORAGE', 'Cookie "session_user" updated -> "apple_developer_tier"', 'success');
+        addWorkbenchEvent('CONSOLE', 'log: Credentials cached.', 'success');
+        setTotalLogCount(prev => prev + 1);
+        syncSandboxStorage();
+      }, 1800);
+      
+      setTimeout(() => {
+        setScriptProgress(100);
+        setScriptRunning(false);
+        addWorkbenchEvent('SYSTEM', 'Authenticate Flow script execution complete.', 'success');
+      }, 2400);
+      
+    } else if (selectedScript === 'checkout') {
+      addWorkbenchEvent('SYSTEM', 'Running E-Commerce Checkout script...', 'active');
+      setCpuMetric(12.2);
+      
+      setTimeout(() => {
+        setScriptProgress(25);
+        console.log("CheckoutService: Starting processing check for studio-display...");
+        addWorkbenchEvent('CONSOLE', 'log: CheckoutService: Starting processing check...', 'active');
+        setTotalLogCount(prev => prev + 1);
+      }, 600);
+      
+      setTimeout(() => {
+        setScriptProgress(50);
+        setCpuMetric(28.4);
+        fetch('https://jsonplaceholder.typicode.com/posts/1')
+          .then(r => r.json())
+          .then(() => {
+            console.warn("CheckoutService: Legacy payment gateway API endpoint is deprecated.");
+            addWorkbenchEvent('NETWORK', 'GET /v1/checkout/verify - 200 OK (38ms)', 'success');
+            addWorkbenchEvent('CONSOLE', 'warn: Legacy checkout endpoint is deprecated.', 'warning');
+            setTotalLogCount(prev => prev + 1);
+            setNetworkRequestCount(prev => prev + 1);
+          });
+      }, 1200);
+      
+      setTimeout(() => {
+        setScriptProgress(75);
+        setCpuMetric(45.6);
+        setFpsMetric(42);
+        
+        console.error("CheckoutService: Checkout transaction failed.", new Error("PaymentGatewayTimeout"));
+        addWorkbenchEvent('CONSOLE', 'error: Checkout transaction failed.', 'error');
+        addWorkbenchEvent('ERROR', 'PaymentGatewayException: Processing timeout', 'error');
+        setTotalLogCount(prev => prev + 1);
+        
+        setTimeout(() => {
+          try {
+            throw new Error("PaymentGatewayException: Processing connection refused by gateway provider.");
+          } catch(e: any) {
+            window.dispatchEvent(new ErrorEvent('error', { error: e, message: e.message }));
+          }
+        }, 50);
+      }, 1800);
+      
+      setTimeout(() => {
+        setScriptProgress(100);
+        setScriptRunning(false);
+        addWorkbenchEvent('SYSTEM', 'Checkout script finished with fatal runtime warning.', 'error');
+      }, 2400);
+      
+    } else if (selectedScript === 'benchmark') {
+      addWorkbenchEvent('SYSTEM', `Launching Virtualization Benchmark: logging ${stressLogCount} entries...`, 'active');
+      setCpuMetric(88.4);
+      setFpsMetric(26);
+      setMemoryMetric(240);
+      
+      setTimeout(() => {
+        setScriptProgress(40);
+        setCpuMetric(96.2);
+        setFpsMetric(18);
+        setMemoryMetric(395);
+        
+        console.log(`Benchmark: Initiating rendering stress test of ${stressLogCount} rows...`);
+        for (let i = 1; i <= stressLogCount; i++) {
+          console.log(`Virtualized log row #${i} - OmniConsole frame stress validation test.`);
+        }
+        console.info(`Benchmark: Stress test loop complete. Emitted ${stressLogCount} logs.`);
+        
+        addWorkbenchEvent('CONSOLE', `log: Emitted ${stressLogCount} virtualized logs.`, 'success');
+        setTotalLogCount(prev => prev + stressLogCount + 2);
+      }, 500);
+      
+      setTimeout(() => {
+        setScriptProgress(80);
+        setCpuMetric(45.2);
+        setFpsMetric(48);
+        setMemoryMetric(84.3);
+      }, 1300);
+      
+      setTimeout(() => {
+        setScriptProgress(100);
+        setScriptRunning(false);
+        setCpuMetric(4.2);
+        setFpsMetric(60);
+        setMemoryMetric(25.1);
+        addWorkbenchEvent('SYSTEM', `Virtualization Stress Test complete. List virtualization verified.`, 'success');
+      }, 1800);
+    }
+  };
+
+  // API Requester Dispatcher
+  const sendCustomRequest = async () => {
+    if (apiSending) return;
+    setApiSending(true);
+    addWorkbenchEvent('SYSTEM', `Sending ${apiMethod} request to ${apiPath}...`, 'active');
+    
+    setTimeout(async () => {
+      let url = 'https://jsonplaceholder.typicode.com/posts';
+      const options: any = {
+        method: apiMethod,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Developer-Lab': 'OmniConsole-API-Requester'
+        }
+      };
+      
+      if (apiMethod === 'POST' || apiMethod === 'PUT') {
+        options.body = apiPayload;
+      }
+      
+      if (apiStatus === 404) {
+        url = 'https://jsonplaceholder.typicode.com/posts/999999';
+      } else if (apiStatus === 400) {
+        url = 'https://jsonplaceholder.typicode.com/posts?invalid_param=1';
+      } else if (apiStatus === 500) {
+        url = 'https://jsonplaceholder.typicode.com/invalid-route-forces-network-500-error';
+      } else if (apiMethod === 'GET') {
+        url = 'https://jsonplaceholder.typicode.com/posts/1';
+      }
+      
+      console.log(`API Requester: Dispatching fetch request: ${apiMethod} ${apiPath}`);
+      
+      try {
+        await fetch(url, options);
+        addWorkbenchEvent('NETWORK', `${apiMethod} ${apiPath} - ${apiStatus} (Simulated ${apiLatency}ms)`, apiStatus >= 400 ? 'error' : 'success');
+        setNetworkRequestCount(prev => prev + 1);
+        
+        if (apiStatus >= 400) {
+          console.error(`API Requester: Request failed with status code ${apiStatus}. Path: ${apiPath}`);
+        } else {
+          console.log(`API Requester: Request completed with status code ${apiStatus}. Response:`, {
+            path: apiPath,
+            method: apiMethod,
+            status: apiStatus,
+            ok: true,
+            data: { id: 1, mockResult: "success" }
+          });
+        }
+      } catch (err: any) {
+        addWorkbenchEvent('NETWORK', `${apiMethod} ${apiPath} - Failed (Network Error)`, 'error');
+        console.error('API Requester: Fetch execution failed:', err);
+      } finally {
+        setApiSending(false);
+      }
+    }, apiLatency);
+  };
+
+  // Storage Sandbox handlers
+  const handleSandboxAdd = (key: string, val: string) => {
+    if (!key) return;
+    if (sandboxStorageTab === 'local') {
+      localStorage.setItem(key, val);
+      console.log(`Storage Action: Set localStorage key "${key}" = "${val}"`);
+      addWorkbenchEvent('STORAGE', `localStorage: Set "${key}" = "${val}"`, 'success');
+    } else if (sandboxStorageTab === 'session') {
+      sessionStorage.setItem(key, val);
+      console.log(`Storage Action: Set sessionStorage key "${key}" = "${val}"`);
+      addWorkbenchEvent('STORAGE', `sessionStorage: Set "${key}" = "${val}"`, 'success');
+    } else if (sandboxStorageTab === 'cookies') {
+      document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(val)}; path=/`;
+      console.log(`Storage Action: Set Cookie "${key}" = "${val}"`);
+      addWorkbenchEvent('STORAGE', `Cookie: Set "${key}" = "${val}"`, 'success');
+    }
+    syncSandboxStorage();
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleSandboxDelete = (key: string) => {
+    if (sandboxStorageTab === 'local') {
+      localStorage.removeItem(key);
+      console.log(`Storage Action: Deleted localStorage key "${key}"`);
+      addWorkbenchEvent('STORAGE', `localStorage: Deleted "${key}"`, 'success');
+    } else if (sandboxStorageTab === 'session') {
+      sessionStorage.removeItem(key);
+      console.log(`Storage Action: Deleted sessionStorage key "${key}"`);
+      addWorkbenchEvent('STORAGE', `sessionStorage: Deleted "${key}"`, 'success');
+    } else if (sandboxStorageTab === 'cookies') {
+      document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      console.log(`Storage Action: Deleted Cookie "${key}"`);
+      addWorkbenchEvent('STORAGE', `Cookie: Deleted "${key}"`, 'success');
+    }
+    syncSandboxStorage();
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleSandboxClearAll = () => {
+    if (sandboxStorageTab === 'local') {
+      localStorage.clear();
+      console.log(`Storage Action: Cleared all localStorage entries`);
+      addWorkbenchEvent('STORAGE', `localStorage: Cleared sandbox`, 'warning');
+    } else if (sandboxStorageTab === 'session') {
+      sessionStorage.clear();
+      console.log(`Storage Action: Cleared all sessionStorage entries`);
+      addWorkbenchEvent('STORAGE', `sessionStorage: Cleared sandbox`, 'warning');
+    } else if (sandboxStorageTab === 'cookies') {
+      document.cookie.split(';').forEach(c => {
+        const parts = c.split('=');
+        const name = parts[0]?.trim();
+        if (name) {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+      });
+      console.log(`Storage Action: Cleared all sandbox cookies`);
+      addWorkbenchEvent('STORAGE', `Cookies: Cleared sandbox`, 'warning');
+    }
+    syncSandboxStorage();
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const triggerUncaughtException = () => {
+    setTimeout(() => {
+      try {
+        throw new Error('Runtime NullPointerException: Cannot read property "id" of null');
+      } catch(e: any) {
+        window.dispatchEvent(new ErrorEvent('error', { error: e, message: e.message }));
+      }
+    }, 50);
+  };
+  
+  const triggerUnhandledRejection = () => {
+    Promise.reject(new Error('Promise Rejected: API Key is expired or invalid.'));
+  };
+
+  return (
+    <div className="bg-zinc-950 min-h-screen text-zinc-300 font-sans selection:bg-zinc-800 selection:text-zinc-100">
+      {/* Playground Hero */}
+      <div 
+        className="relative overflow-hidden pt-36 pb-20 border-b border-zinc-900 bg-radial-[at_center_top] from-zinc-900/30 via-zinc-950 to-zinc-950" 
+        onMouseMove={handleHeroMouseMove}
+        style={{
+          // Spotlight variables will be calculated by handleHeroMouseMove
+          backgroundImage: 'radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 30%), rgba(39, 39, 42, 0.15), transparent)'
+        } as React.CSSProperties}
+      >
+        {/* Subtle grid background overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
+        
+        <div className="max-w-[1060px] mx-auto px-6 relative z-10 text-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-zinc-900/80 text-zinc-400 border border-zinc-850 mb-6 select-none shadow-sm">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-zinc-500">
+              <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3Z" />
+            </svg>
+            <span>Interactive Sandbox</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-zinc-100 tracking-tight mb-4">
+            Developer Lab
+          </h1>
+          <p className="text-zinc-400 text-sm md:text-base max-w-xl mx-auto mb-8 leading-relaxed">
+            Simulate. Instrument. Profile. A high-fidelity sandbox environment for testing telemetry captures, cookie keychains, and high-speed virtualization metrics.
+          </p>
+          <div className="flex justify-center items-center gap-4">
+            <button 
+              className="px-5 py-2.5 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-900 hover:bg-zinc-200 transition-colors shadow-sm cursor-pointer"
+              onClick={() => {
+                const el = document.getElementById('workbench-section');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Launch Active Workbench
+            </button>
+            <button 
+              className="px-5 py-2.5 rounded-lg text-xs font-bold bg-zinc-900/60 text-zinc-300 hover:text-zinc-100 border border-zinc-850 hover:bg-zinc-900 transition-colors cursor-pointer"
+              onClick={() => {
+                const el = document.getElementById('explainer-section');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Explore Telemetry Tools
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[1060px] mx-auto px-6 py-12 flex flex-col gap-16">
+        {/* Section B: Explanatory Bento Grid */}
+        <section id="explainer-section" className="scroll-mt-28">
+          <div className="text-center mb-10">
+            <h2 className="text-xl md:text-2xl font-bold text-zinc-100 tracking-tight mb-2">Telemetry Instruments</h2>
+            <p className="text-zinc-500 text-xs md:text-sm">How the OmniConsole intercept system hooks into standard browser layers.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Bento Card 1: Console Hook */}
+            <div className="md:col-span-1 rounded-2xl bg-zinc-900/30 border border-zinc-900 p-6 flex flex-col justify-between group hover:border-zinc-800 transition-colors">
+              <div>
+                <div className="w-9 h-9 rounded-xl bg-zinc-900/60 border border-zinc-800/40 flex items-center justify-center text-zinc-400 mb-4 shadow-inner">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                </div>
+                <h3 className="text-sm font-bold text-zinc-200 mb-1.5">Console Hook</h3>
+                <p className="text-zinc-500 text-[11.5px] leading-relaxed mb-6">Intercepts global console logs, wrapping JSON payloads in colored syntax trees.</p>
+              </div>
+              <div className="rounded-xl border border-zinc-850/60 bg-zinc-950/70 p-3 font-mono text-[10.5px] text-zinc-400 select-none leading-relaxed">
+                <span className="text-zinc-600">const</span> raw = console.log;<br />
+                console.log = (...args) =&gt; &#123;<br />
+                &nbsp;&nbsp;syncToViewport(args);<br />
+                &nbsp;&nbsp;raw(...args);<br />
+                &#125;
+              </div>
+            </div>
+
+            {/* Bento Card 2: Network Tunnel */}
+            <div className="md:col-span-2 rounded-2xl bg-zinc-900/30 border border-zinc-900 p-6 flex flex-col justify-between hover:border-zinc-800 transition-colors">
+              <div>
+                <div className="w-9 h-9 rounded-xl bg-zinc-900/60 border border-zinc-800/40 flex items-center justify-center text-zinc-400 mb-4 shadow-inner">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                </div>
+                <h3 className="text-sm font-bold text-zinc-200 mb-1.5">Network Tunnel</h3>
+                <p className="text-zinc-500 text-[11.5px] leading-relaxed mb-6">Hooks standard Fetch and XHR protocols to collect request status, headers, and latency metrics.</p>
+              </div>
+              <div className="flex flex-col gap-2.5 p-3 rounded-xl border border-zinc-850/60 bg-zinc-950/70 select-none">
+                <div className="flex items-center justify-between text-[10px] bg-zinc-900/40 px-3 py-2 rounded-lg border border-zinc-850/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-emerald-500 font-bold">GET</span>
+                    <span className="text-zinc-300 font-mono">/auth/session</span>
+                  </div>
+                  <div className="flex items-center gap-3 font-mono">
+                    <span className="text-emerald-500">200 OK</span>
+                    <span className="text-zinc-600">22ms</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-[10px] bg-zinc-900/40 px-3 py-2 rounded-lg border border-zinc-850/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-violet-400 font-bold">POST</span>
+                    <span className="text-zinc-300 font-mono">/cart/add</span>
+                  </div>
+                  <div className="flex items-center gap-3 font-mono">
+                    <span className="text-emerald-500">201 Created</span>
+                    <span className="text-zinc-600">112ms</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bento Card 3: Storage Keychain */}
+            <div className="md:col-span-1 rounded-2xl bg-zinc-900/30 border border-zinc-900 p-6 flex flex-col justify-between hover:border-zinc-800 transition-colors">
+              <div>
+                <div className="w-9 h-9 rounded-xl bg-zinc-900/60 border border-zinc-800/40 flex items-center justify-center text-zinc-400 mb-4 shadow-inner">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></svg>
+                </div>
+                <h3 className="text-sm font-bold text-zinc-200 mb-1.5">Keychain Storage</h3>
+                <p className="text-zinc-500 text-[11.5px] leading-relaxed mb-6">Monitors LocalStorage, SessionStorage, and Document Cookies dynamically with reactive delete hooks.</p>
+              </div>
+              <div className="rounded-xl border border-zinc-850/60 bg-zinc-950/70 p-3 text-[10.5px] font-mono select-none">
+                <div className="flex justify-between pb-1.5 border-b border-zinc-900 text-zinc-600">
+                  <span>Key</span>
+                  <span>Value</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-zinc-900/50">
+                  <span className="text-emerald-500">theme</span>
+                  <span className="text-zinc-300">"dark"</span>
+                </div>
+                <div className="flex justify-between pt-1.5">
+                  <span className="text-emerald-500">session</span>
+                  <span className="text-zinc-300">"active"</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bento Card 4: List Recycler */}
+            <div className="md:col-span-1 rounded-2xl bg-zinc-900/30 border border-zinc-900 p-6 flex flex-col justify-between hover:border-zinc-800 transition-colors">
+              <div>
+                <div className="w-9 h-9 rounded-xl bg-zinc-900/60 border border-zinc-800/40 flex items-center justify-center text-zinc-400 mb-4 shadow-inner">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <h3 className="text-sm font-bold text-zinc-200 mb-1.5">List Recycler</h3>
+                <p className="text-zinc-500 text-[11.5px] leading-relaxed mb-6">Uses virtual scroll recyclers to render 10,000+ logs at 60 FPS under 30MB RAM overhead.</p>
+              </div>
+              <div className="flex justify-center items-center py-4 bg-zinc-950/40 rounded-xl border border-zinc-850/50 select-none">
+                <div className="text-center px-4 py-2 bg-zinc-900/60 border border-zinc-850 rounded-lg shadow-sm">
+                  <div className="text-2xl font-black text-amber-500 font-mono leading-none">60</div>
+                  <div className="text-[9px] font-bold text-zinc-500 mt-1 uppercase tracking-wide">FPS</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bento Card 5: Exception Shield */}
+            <div className="md:col-span-1 rounded-2xl bg-zinc-900/30 border border-zinc-900 p-6 flex flex-col justify-between hover:border-zinc-800 transition-colors">
+              <div>
+                <div className="w-9 h-9 rounded-xl bg-zinc-900/60 border border-zinc-800/40 flex items-center justify-center text-zinc-400 mb-4 shadow-inner">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <h3 className="text-sm font-bold text-zinc-200 mb-1.5">Exception Shield</h3>
+                <p className="text-zinc-500 text-[11.5px] leading-relaxed mb-6">Automatically catches window errors and unhandled rejections with exact trace sources.</p>
+              </div>
+              <div className="flex justify-center items-center py-4 bg-zinc-950/40 rounded-xl border border-zinc-850/50 select-none">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="text-red-500/70"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section C: Diagnostic Workbench */}
+        <section id="workbench-section" className="scroll-mt-28">
+          <div className="text-center mb-10">
+            <h2 className="text-xl md:text-2xl font-bold text-zinc-100 tracking-tight mb-2">Diagnostics Workspace</h2>
+            <p className="text-zinc-500 text-xs md:text-sm">Real-time simulation engine. Mutate state, trigger calls, and inspect diagnostics.</p>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-900 bg-zinc-950/60 overflow-hidden shadow-2xl shadow-black/45">
+            {/* Xcode Window Header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-zinc-900/60 border-b border-zinc-900 select-none">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-800 border border-zinc-700/40"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-800 border border-zinc-700/40"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-800 border border-zinc-700/40"></span>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400 font-sans">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                <span>OmniConsole Simulator — workspace.xcworkspace</span>
+              </div>
+              <div className="flex items-center gap-2 bg-zinc-900/80 px-2.5 py-0.5 rounded-full border border-zinc-850">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-[10px] font-bold text-zinc-400 tracking-wide uppercase">Simulating</span>
+              </div>
+            </div>
+
+            {/* Xcode Build Status Bar */}
+            <div className="flex flex-wrap items-center gap-4 px-5 py-2.5 bg-zinc-900/25 border-b border-zinc-900/80 text-[10.5px] font-semibold text-zinc-500 select-none tracking-wide">
+              <div>
+                <span className="text-zinc-600 mr-1.5">TARGET:</span>
+                <span className="text-zinc-300">OmniConsole Intercept Engine</span>
+              </div>
+              <div className="text-zinc-800">|</div>
+              <div>
+                <span className="text-zinc-600 mr-1.5">SESSION UPTIME:</span>
+                <span className="text-zinc-300 font-mono">{elapsedTime}s</span>
+              </div>
+              <div className="text-zinc-800">|</div>
+              <div>
+                <span className="text-zinc-600 mr-1.5">EVENT COUNTERS:</span>
+                <span className="text-zinc-400">
+                  Logs: <span className="font-mono text-zinc-200">{totalLogCount}</span> &bull; 
+                  Network: <span className="font-mono text-zinc-200">{networkRequestCount}</span> &bull; 
+                  Storage: <span className="font-mono text-zinc-200">{storageCount}</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Main Workbench Grid Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-zinc-900">
+              {/* Left Column: Interactive Controls (lg:col-span-7) */}
+              <div className="lg:col-span-7 p-6 flex flex-col gap-6">
+                
+                {/* 1. Console Script Runner */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-zinc-600 font-mono tracking-wider bg-zinc-900 px-2 py-0.5 rounded border border-zinc-850">01</span>
+                    <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Console Script Runner</h3>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">Select and execute a prebuilt JavaScript application flow in the sandbox environment.</p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <select 
+                      className="flex-1 bg-zinc-900 border border-zinc-850 text-zinc-200 px-3 py-2 rounded-lg text-xs font-medium outline-none focus:border-zinc-700/80 cursor-pointer disabled:opacity-50"
+                      value={selectedScript}
+                      onChange={(e: any) => setSelectedScript(e.target.value)}
+                      disabled={scriptRunning}
+                    >
+                      <option value="auth">User Authentication Flow (auth.ts)</option>
+                      <option value="checkout">E-Commerce Checkout (checkout.ts)</option>
+                      <option value="benchmark">Virtual List Performance Benchmark (stressTest.ts)</option>
+                    </select>
+                    
+                    <button 
+                      className={`px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm shrink-0 cursor-pointer disabled:opacity-50 ${
+                        scriptRunning 
+                          ? 'bg-zinc-850 text-zinc-400' 
+                          : 'bg-zinc-100 text-zinc-900 hover:bg-zinc-200'
+                      }`}
+                      onClick={runSelectedScript}
+                      disabled={scriptRunning}
+                    >
+                      {scriptRunning ? 'Executing...' : 'Run Script'}
+                    </button>
+                  </div>
+
+                  {scriptRunning && (
+                    <div className="w-full h-1 bg-zinc-900/60 rounded-full overflow-hidden border border-zinc-850/30">
+                      <div 
+                        className="h-full bg-zinc-400 transition-all duration-300 rounded-full" 
+                        style={{ width: `${scriptProgress}%` }}
+                      ></div>
+                    </div>
+                  )}
+
+                  {/* Code Editor Mock block */}
+                  <div className="rounded-xl border border-zinc-900/80 bg-zinc-950/80 overflow-hidden font-mono text-[11px] text-zinc-400 leading-normal p-3 shadow-inner">
+                    <div className="flex justify-between items-center pb-2 border-b border-zinc-900 mb-2 text-[10px] text-zinc-500 font-semibold select-none">
+                      <span>{selectedScript === 'auth' ? 'auth.ts' : selectedScript === 'checkout' ? 'checkout.ts' : 'stressTest.ts'}</span>
+                      <span>TypeScript</span>
+                    </div>
+                    <pre className="overflow-x-auto whitespace-pre-wrap max-h-48 text-zinc-300">
+                      <code>{SCRIPT_PRESETS[selectedScript]}</code>
+                    </pre>
+                  </div>
+                </div>
+
+                {/* 2. Custom API Requester */}
+                <div className="flex flex-col gap-3 pt-6 border-t border-zinc-900/50">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-zinc-600 font-mono tracking-wider bg-zinc-900 px-2 py-0.5 rounded border border-zinc-850">02</span>
+                    <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Custom API Requester</h3>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">Manually configure REST endpoint fetches. Intercept latency, headers, and status outcomes.</p>
+                  
+                  <div className="flex flex-col gap-3">
+                    <div>
+                      <label className="text-[10px] font-bold text-zinc-500 mb-1.5 block select-none uppercase tracking-wide">Request Endpoint</label>
+                      <div className="flex items-center bg-zinc-900 border border-zinc-850 rounded-lg overflow-hidden focus-within:border-zinc-700/80 px-3 py-1.5">
+                        <span className="text-zinc-600 font-mono text-xs select-none">/</span>
+                        <input 
+                          type="text" 
+                          className="w-full bg-transparent border-none text-zinc-200 text-xs font-medium outline-none px-1 ml-0.5" 
+                          value={apiPath} 
+                          onChange={(e) => setApiPath(e.target.value)}
+                          placeholder="v1/products/studio-display"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold text-zinc-500 mb-1.5 block select-none uppercase tracking-wide">HTTP Method</label>
+                        <div className="flex bg-zinc-900/75 p-0.5 rounded-lg border border-zinc-850">
+                          {(['GET', 'POST', 'PUT', 'DELETE'] as const).map(m => (
+                            <button 
+                              key={m}
+                              className={`flex-1 text-center py-1.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                                apiMethod === m 
+                                  ? 'bg-zinc-800 text-zinc-100' 
+                                  : 'text-zinc-500 hover:text-zinc-300'
+                              }`}
+                              onClick={() => setApiMethod(m)}
+                            >
+                              {m}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="text-[10px] font-bold text-zinc-500 mb-1.5 block select-none uppercase tracking-wide">Response Status</label>
+                        <select 
+                          className="w-full bg-zinc-900 border border-zinc-850 text-zinc-200 px-3 py-1.5 rounded-lg text-xs font-medium outline-none focus:border-zinc-700/80 cursor-pointer"
+                          value={apiStatus}
+                          onChange={(e) => setApiStatus(Number(e.target.value))}
+                        >
+                          <option value="200">200 OK</option>
+                          <option value="201">201 Created</option>
+                          <option value="400">400 Bad Request</option>
+                          <option value="404">404 Not Found</option>
+                          <option value="500">500 Server Error</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-[10px] font-bold text-zinc-500 mb-1.5 select-none uppercase tracking-wide">
+                        <span>Simulated Network Latency</span>
+                        <span className="font-mono text-zinc-400">{apiLatency}ms</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="2000" 
+                          step="50"
+                          value={apiLatency}
+                          onChange={(e) => setApiLatency(Number(e.target.value))}
+                          className="flex-1 accent-zinc-350 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                    
+                    {(apiMethod === 'POST' || apiMethod === 'PUT') && (
+                      <div>
+                        <label className="text-[10px] font-bold text-zinc-500 mb-1.5 block select-none uppercase tracking-wide">Request JSON Payload</label>
+                        <textarea 
+                          className="w-full bg-zinc-900 border border-zinc-850 rounded-lg text-zinc-200 font-mono text-[11px] p-2.5 outline-none focus:border-zinc-700/80 resize-none"
+                          value={apiPayload}
+                          onChange={(e) => setApiPayload(e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button 
+                    className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-900 hover:bg-zinc-200 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+                    onClick={sendCustomRequest}
+                    disabled={apiSending}
+                  >
+                    {apiSending ? 'Sending HTTP Request...' : 'Dispatch HTTP Request'}
+                  </button>
+                </div>
+
+                {/* 3. Keychain Storage Sandbox */}
+                <div className="flex flex-col gap-3 pt-6 border-t border-zinc-900/50">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-zinc-600 font-mono tracking-wider bg-zinc-900 px-2 py-0.5 rounded border border-zinc-850">03</span>
+                    <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider">Keychain Storage Sandbox</h3>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">Mutate storage values in real time to verify reactive updates in the OmniConsole UI.</p>
+                  
+                  <div className="flex border-b border-zinc-900 pb-1.5 gap-2 select-none">
+                    {(['local', 'session', 'cookies'] as const).map(tab => (
+                      <button 
+                        key={tab}
+                        className={`px-3 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
+                          sandboxStorageTab === tab 
+                            ? 'text-zinc-100 bg-zinc-900 border border-zinc-850' 
+                            : 'text-zinc-500 hover:text-zinc-300'
+                        }`}
+                        onClick={() => setSandboxStorageTab(tab)}
+                      >
+                        {tab === 'local' ? 'LocalStorage' : tab === 'session' ? 'SessionStorage' : 'Cookies'}
+                        <span className="ml-1 text-[9px] bg-zinc-950/80 border border-zinc-850 px-1 py-0.25 rounded text-zinc-500">
+                          {tab === 'cookies' ? sandboxCookies.length : tab === 'local' ? sandboxLocal.length : sandboxSession.length}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Keychain table container */}
+                  <div className="border border-zinc-900 bg-zinc-950/50 rounded-xl overflow-hidden max-h-40 overflow-y-auto">
+                    <table className="w-full text-left border-collapse text-[11px]">
+                      <thead>
+                        <tr className="text-zinc-500 border-b border-zinc-900 select-none">
+                          <th className="p-2.5 font-bold uppercase tracking-wider">Key</th>
+                          <th className="p-2.5 font-bold uppercase tracking-wider">Value</th>
+                          <th className="p-2.5 w-10"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sandboxStorageTab === 'cookies' && (
+                          sandboxCookies.length === 0 ? (
+                            <tr><td colSpan={3} className="p-4 text-center text-zinc-600 font-medium">No cookies found.</td></tr>
+                          ) : (
+                            sandboxCookies.map(cookie => (
+                              <tr key={cookie.key} className="border-b border-zinc-900/40 hover:bg-zinc-900/20 text-zinc-300">
+                                <td className="p-2.5 font-mono text-zinc-400 font-semibold">{cookie.key}</td>
+                                <td className="p-2.5 font-mono truncate max-w-[120px]">{cookie.value}</td>
+                                <td className="p-2.5 text-center">
+                                  <button className="text-red-400 hover:text-red-300 transition-colors cursor-pointer" onClick={() => handleSandboxDelete(cookie.key)}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          )
+                        )}
+                        {sandboxStorageTab === 'local' && (
+                          sandboxLocal.length === 0 ? (
+                            <tr><td colSpan={3} className="p-4 text-center text-zinc-600 font-medium">LocalStorage sandbox empty.</td></tr>
+                          ) : (
+                            sandboxLocal.map(item => (
+                              <tr key={item.key} className="border-b border-zinc-900/40 hover:bg-zinc-900/20 text-zinc-300">
+                                <td className="p-2.5 font-mono text-zinc-400 font-semibold">{item.key}</td>
+                                <td className="p-2.5 font-mono truncate max-w-[120px]">{item.value}</td>
+                                <td className="p-2.5 text-center">
+                                  <button className="text-red-400 hover:text-red-300 transition-colors cursor-pointer" onClick={() => handleSandboxDelete(item.key)}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          )
+                        )}
+                        {sandboxStorageTab === 'session' && (
+                          sandboxSession.length === 0 ? (
+                            <tr><td colSpan={3} className="p-4 text-center text-zinc-600 font-medium">SessionStorage sandbox empty.</td></tr>
+                          ) : (
+                            sandboxSession.map(item => (
+                              <tr key={item.key} className="border-b border-zinc-900/40 hover:bg-zinc-900/20 text-zinc-300">
+                                <td className="p-2.5 font-mono text-zinc-400 font-semibold">{item.key}</td>
+                                <td className="p-2.5 font-mono truncate max-w-[120px]">{item.value}</td>
+                                <td className="p-2.5 text-center">
+                                  <button className="text-red-400 hover:text-red-300 transition-colors cursor-pointer" onClick={() => handleSandboxDelete(item.key)}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2.5">
+                    <input 
+                      type="text" 
+                      placeholder="New Key" 
+                      className="flex-1 bg-zinc-900 border border-zinc-850 rounded-lg text-zinc-200 text-xs px-3 py-1.5 outline-none focus:border-zinc-700/80"
+                      value={storageKey}
+                      onChange={(e) => setStorageKey(e.target.value)}
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Value" 
+                      className="flex-1 bg-zinc-900 border border-zinc-850 rounded-lg text-zinc-200 text-xs px-3 py-1.5 outline-none focus:border-zinc-700/80"
+                      value={storageVal}
+                      onChange={(e) => setStorageVal(e.target.value)}
+                    />
+                    <button 
+                      className="px-4 py-1.5 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-900 hover:bg-zinc-200 transition-colors cursor-pointer shadow-sm"
+                      onClick={() => {
+                        handleSandboxAdd(storageKey, storageVal);
+                        setStorageKey('');
+                        setStorageVal('');
+                      }}
+                    >
+                      Add
+                    </button>
+                  </div>
+                  
+                  <button 
+                    className="w-full mt-1.5 py-1.5 rounded-lg text-[10.5px] font-bold bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-900/30 hover:border-red-900/60 transition-colors cursor-pointer"
+                    onClick={handleSandboxClearAll}
+                  >
+                    Clear Active Sandbox
+                  </button>
+                </div>
+
+                {/* 4. Exceptions & Failures */}
+                <div className="flex flex-col gap-3 pt-6 border-t border-zinc-900/50">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-red-500 font-mono tracking-wider bg-red-950/10 px-2 py-0.5 rounded border border-red-900/20">04</span>
+                    <h3 className="text-xs font-bold text-red-500 uppercase tracking-wider">Exceptions & Failures</h3>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">Simulate fatal uncaught runtime script exception boundaries and async promise rejections.</p>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <button 
+                      className="py-2.5 rounded-lg text-[10.5px] font-bold bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-900/30 hover:border-red-900/60 transition-colors cursor-pointer"
+                      onClick={triggerUncaughtException}
+                    >
+                      Throw Script Error
+                    </button>
+                    <button 
+                      className="py-2.5 rounded-lg text-[10.5px] font-bold bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-900/30 hover:border-red-900/60 transition-colors cursor-pointer"
+                      onClick={triggerUnhandledRejection}
+                    >
+                      Reject Promise Auth
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Right Column: Profiler & Output Feed (lg:col-span-5) */}
+              <div className="lg:col-span-5 p-6 flex flex-col gap-6 bg-zinc-900/10">
+                <div>
+                  <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider mb-1">Diagnostics Profiler</h3>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">Monitor hardware stress simulation metrics in real-time as logs flow.</p>
+                </div>
+
+                {/* Hardware dials */}
+                <div className="flex items-center justify-around py-4 bg-zinc-950/40 border border-zinc-900 rounded-xl">
+                  {/* CPU Load dial */}
+                  <div className="flex flex-col items-center gap-1.5 select-none">
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                      <svg width="64" height="64" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.02)" strokeWidth="8" fill="none" />
+                        <circle cx="50" cy="50" r="40" stroke={cpuMetric > 80 ? '#f87171' : '#a78bfa'} strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 - (251.2 * cpuMetric) / 100} fill="none" strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.3s ease-out', transform: 'rotate(-90deg)', transformOrigin: '50px 50px' }} />
+                      </svg>
+                      <div className="absolute text-[11px] font-bold font-mono text-zinc-100">{cpuMetric}%</div>
+                    </div>
+                    <span className="text-[9px] font-bold tracking-wider text-zinc-500 uppercase">CPU Load</span>
+                  </div>
+
+                  {/* RAM Load dial */}
+                  <div className="flex flex-col items-center gap-1.5 select-none">
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                      <svg width="64" height="64" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.02)" strokeWidth="8" fill="none" />
+                        <circle cx="50" cy="50" r="40" stroke={memoryMetric > 300 ? '#fbbf24' : '#34d399'} strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 - (251.2 * Math.min(500, memoryMetric)) / 500} fill="none" strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.4s ease-out', transform: 'rotate(-90deg)', transformOrigin: '50px 50px' }} />
+                      </svg>
+                      <div className="absolute text-[9.5px] font-bold font-mono text-zinc-100">{memoryMetric}M</div>
+                    </div>
+                    <span className="text-[9px] font-bold tracking-wider text-zinc-500 uppercase">RAM Alloc</span>
+                  </div>
+                </div>
+
+                {/* Virtualization Frame Rate chart */}
+                <div className="rounded-xl border border-zinc-900 bg-zinc-950/50 p-4 select-none">
+                  <div className="flex justify-between items-center text-[10.5px] text-zinc-500 font-bold mb-3 uppercase tracking-wide">
+                    <span>Virtualization Rate</span>
+                    <span className={`font-mono font-bold ${fpsMetric < 40 ? 'text-red-400' : 'text-zinc-300'}`}>{fpsMetric} FPS</span>
+                  </div>
+                  
+                  <div className="h-14 w-full">
+                    <svg width="100%" height="100%" viewBox="0 0 300 50" preserveAspectRatio="none" className="overflow-visible">
+                      <line x1="0" y1="12.5" x2="300" y2="12.5" stroke="rgba(255,255,255,0.015)" strokeWidth="1" />
+                      <line x1="0" y1="25" x2="300" y2="25" stroke="rgba(255,255,255,0.015)" strokeWidth="1" />
+                      <line x1="0" y1="37.5" x2="300" y2="37.5" stroke="rgba(255,255,255,0.015)" strokeWidth="1" />
+                      
+                      <path
+                        d={`M ${fpsHistory.map((val, idx) => {
+                          const x = (idx / 29) * 300;
+                          const y = 50 - (val / 60) * 50;
+                          return `${x} ${y}`;
+                        }).join(' L ')}`}
+                        fill="none"
+                        className="transition-colors duration-200"
+                        stroke={fpsMetric < 40 ? '#f87171' : fpsMetric < 55 ? '#fbbf24' : '#a78bfa'}
+                        strokeWidth="1.75"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Stress Benchmarking Scale */}
+                <div className="rounded-xl border border-zinc-900 bg-zinc-950/50 p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center text-[10.5px] text-zinc-500 font-bold uppercase tracking-wide select-none">
+                    <span>Benchmark Scale</span>
+                    <span className="font-mono text-zinc-300 font-bold">{stressLogCount} rows</span>
+                  </div>
+                  
+                  <input
+                    type="range"
+                    min="200"
+                    max="10000"
+                    step="200"
+                    className="w-full accent-zinc-350 cursor-pointer"
+                    value={stressLogCount}
+                    onChange={(e) => setStressLogCount(Number(e.target.value))}
+                  />
+                  
+                  <button 
+                    className="w-full py-2 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-850 hover:border-zinc-750 text-zinc-300 hover:text-zinc-100 transition-colors shadow-sm disabled:opacity-50 cursor-pointer" 
+                    onClick={() => {
+                      setSelectedScript('benchmark');
+                      setTimeout(() => {
+                        runSelectedScript();
+                      }, 100);
+                    }}
+                    disabled={scriptRunning}
+                  >
+                    Run Virtualization Benchmark
+                  </button>
+                </div>
+
+                {/* Active Trace list */}
+                <div className="rounded-xl border border-zinc-900 bg-zinc-950/50 p-4 flex-1 flex flex-col gap-3 min-h-60 max-h-72">
+                  <div className="text-[10.5px] text-zinc-500 font-bold uppercase tracking-wide select-none">
+                    Simulator Event Feed
+                  </div>
+                  
+                  <div className="flex-1 overflow-y-auto flex flex-col gap-2 font-mono text-[9.5px]">
+                    {workbenchEvents.length === 0 ? (
+                      <div className="text-center text-zinc-600 font-medium py-10">No events recorded.</div>
+                    ) : (
+                      workbenchEvents.map((evt, idx) => (
+                        <div 
+                          key={idx} 
+                          className="flex gap-2 px-2.5 py-1.5 rounded bg-zinc-900/30 border-l-2 border-zinc-800"
+                          style={{
+                            borderLeftColor: evt.status === 'error' ? '#f87171' : evt.status === 'warning' ? '#fbbf24' : evt.status === 'success' ? '#34d399' : '#a78bfa'
+                          }}
+                        >
+                          <span className="text-zinc-600 shrink-0 select-none">{evt.time}</span>
+                          <span 
+                            className="font-bold shrink-0 select-none min-w-[54px]"
+                            style={{ 
+                              color: evt.type === 'ERROR' ? '#f87171' : evt.type === 'NETWORK' ? '#a78bfa' : evt.type === 'STORAGE' ? '#34d399' : evt.type === 'CONSOLE' ? '#38bdf8' : '#86868b'
+                            }}
+                          >
+                            [{evt.type}]
+                          </span>
+                          <span className="text-zinc-400 truncate flex-1">{evt.msg}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,892 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// const TICKER_MESSAGES = [
+//   { tag: 'console.log', msg: 'Action: Add to Cart - Apple Studio Display ($1599.00)' },
+//   { tag: 'network.xhr', msg: 'POST https://api.omnishop.io/v1/stock/studio-display - 200 OK (34ms)' },
+//   { tag: 'storage.set', msg: 'localStorage: Set "theme" = "dark"' },
+//   { tag: 'console.warn', msg: 'CheckoutService: Legacy payment API is deprecated.' },
+//   { tag: 'console.error', msg: 'API Error: Stock check endpoint /api/stock returned 404 Not Found.' }
+// ];
+
+export default function LandingView() {
+  const navigate = useNavigate();
+
+  // --- Showcase State ---
+  const [productFinish, setProductFinish] = useState<'gray' | 'silver'>('gray');
+  const [productStand, setProductStand] = useState<'tilt' | 'height'>('tilt');
+  const [cartCount, setCartCount] = useState(0);
+
+  const [showcaseLogs, setShowcaseLogs] = useState<any[]>([
+    { id: 1, type: 'info', text: 'OmniConsole Mock agent initialized.', timestamp: '12:52:00', file: 'main.ts:8', data: { status: 'ready', protocol: 'https' } }
+  ]);
+  const [showcaseRequests, setShowcaseRequests] = useState<any[]>([
+    { id: 1, method: 'GET', url: 'https://api.omnishop.io/v1/config', status: 200, latency: '24ms', timestamp: '12:52:02', size: '1.2 KB', response: { theme: 'dark', forceProd: false } }
+  ]);
+  const [showcaseCookies, setShowcaseCookies] = useState<any[]>([
+    { key: 'session_user', value: 'guest_tier' },
+    { key: 'theme_preference', value: 'dark' }
+  ]);
+  const [showcaseLocalStorage, setShowcaseLocalStorage] = useState<any[]>([
+    { key: 'theme', value: 'dark' },
+    { key: 'forceProd', value: 'false' }
+  ]);
+  
+  const [showcaseActiveTab, setShowcaseActiveTab] = useState<'console' | 'network' | 'storage'>('console');
+  const [showcaseLogFilter, setShowcaseLogFilter] = useState<'all' | 'logs' | 'warns' | 'errors'>('all');
+  const [expandedLogId, setExpandedLogId] = useState<number | null>(null);
+  const [expandedRequestId, setExpandedRequestId] = useState<number | null>(null);
+  const [showcaseStorageTab, setShowcaseStorageTab] = useState<'cookies' | 'local'>('cookies');
+  
+  // Custom storage inputs for showcase
+  const [newKey, setNewKey] = useState('');
+  const [newVal, setNewVal] = useState('');
+
+  // Ticker State
+  // const [tickerLogs, setTickerLogs] = useState<any[]>([]);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Ticker Logs effect
+  // useEffect(() => {
+  //   setTickerLogs([
+  //     { time: '12:52:01', tag: 'console.log', msg: 'Core initialized: intercepted global console methods' },
+  //     { time: '12:52:03', tag: 'network.xhr', msg: 'GET https://api.omnishop.io/products/studio-display - 200 OK (45ms)' },
+  //     { time: '12:52:04', tag: 'storage.set', msg: 'cookie "session_user" updated -> "guest_tier"' }
+  //   ]);
+  // 
+  //   let counter = 0;
+  //   const interval = setInterval(() => {
+  //     const nextMsg = TICKER_MESSAGES[counter % TICKER_MESSAGES.length];
+  //     const now = new Date();
+  //     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  //     
+  //     setTickerLogs(prev => {
+  //       const updated = [...prev, { time: timeStr, tag: nextMsg.tag, msg: nextMsg.msg }];
+  //       if (updated.length > 4) {
+  //         updated.shift();
+  //       }
+  //       return updated;
+  //     });
+  //     counter++;
+  //   }, 2500);
+  // 
+  //   return () => clearInterval(interval);
+  // }, []);
+
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Helpers to add showcase items
+  const addShowcaseLog = (type: 'log' | 'info' | 'warn' | 'error', text: string, data?: any) => {
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    const id = Date.now() + Math.random();
+    
+    const fileMap = {
+      log: 'App.tsx:34',
+      info: 'catalog.ts:89',
+      warn: 'checkout.ts:127',
+      error: 'api.ts:241'
+    };
+    
+    setShowcaseLogs(prev => [
+      ...prev,
+      { id, type, text, timestamp: timeStr, file: fileMap[type] || 'App.tsx:12', data }
+    ]);
+  };
+
+  const addShowcaseRequest = (method: string, url: string, status: number, latency: string, size: string, response?: any) => {
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    const id = Date.now() + Math.random();
+    setShowcaseRequests(prev => [
+      ...prev,
+      { id, method, url, status, latency, timestamp: timeStr, size, response }
+    ]);
+  };
+
+  // --- Interactive Live Demo triggers ---
+  const triggerDemoLog = () => {
+    const payload = {
+      product: 'Apple Studio Display',
+      price: productStand === 'tilt' ? 1599.00 : 1999.00,
+      finish: productFinish === 'gray' ? 'Space Gray' : 'Silver',
+      stand: productStand === 'tilt' ? 'Tilt-adjustable' : 'Tilt & Height adjustable',
+      quantity: 1,
+      currency: 'USD',
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log('Action: Add to Cart', payload);
+    addShowcaseLog('log', 'Action: Add to Cart', payload);
+    setCartCount(prev => prev + 1);
+  };
+
+  const triggerDemoWarn = () => {
+    const msg = 'Deprecated option: checkoutFlowV1 is deprecated. Migrating to checkoutFlowV2 soon.';
+    console.warn(msg);
+    addShowcaseLog('warn', msg);
+  };
+
+  const [isSyncing, setIsSyncing] = useState(false);
+  const triggerDemoFetch = async () => {
+    setIsSyncing(true);
+    const msgInfo = 'Initiating product catalog fetch request...';
+    console.info(msgInfo);
+    addShowcaseLog('info', msgInfo);
+    
+    const reqId = Date.now() + Math.random();
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    
+    setShowcaseRequests(prev => [
+      ...prev,
+      { id: reqId, method: 'GET', url: 'https://api.omnishop.io/v1/stock/studio-display', status: 0, latency: 'pending', timestamp: timeStr, size: '-' }
+    ]);
+
+    try {
+      const res = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+      const data = await res.json();
+      
+      const latencyStr = '34ms';
+      const sizeStr = '542 B';
+      const responsePayload = {
+        productId: 'studio-display',
+        inStock: true,
+        remainingQty: 12,
+        syncTime: new Date().toISOString(),
+        mockData: { id: data.id, title: data.title.substring(0, 25) + '...' }
+      };
+
+      console.log('Product details sync completed successfully.', responsePayload);
+      
+      setShowcaseRequests(prev => prev.map(req => 
+        req.id === reqId 
+          ? { ...req, status: 200, latency: latencyStr, size: sizeStr, response: responsePayload }
+          : req
+      ));
+      
+      addShowcaseLog('log', 'Product details sync completed successfully.', responsePayload);
+    } catch(e) {
+      console.error(e);
+      addShowcaseLog('error', 'Product details sync failed due to connection timeout.');
+      setShowcaseRequests(prev => prev.map(req => 
+        req.id === reqId 
+          ? { ...req, status: 504, latency: '1200ms', size: '0 B' }
+          : req
+      ));
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const triggerDemoError = () => {
+    const errorMsg = 'API Error: Stock check endpoint /api/stock returned 404 Not Found.';
+    console.error(errorMsg);
+    addShowcaseLog('error', errorMsg);
+    addShowcaseRequest('GET', 'https://api.omnishop.io/v1/stock/studio-display', 404, '36ms', '124 B', { error: 'Not Found', message: 'Product stock endpoint deprecated' });
+  };
+
+  const triggerDemoCookie = () => {
+    const key = 'session_user';
+    const val = 'apple_developer_tier';
+    document.cookie = `${key}=${val}; path=/`;
+    console.log(`Storage Action: Set cookie ${key} = ${val}`);
+    
+    setShowcaseCookies(prev => {
+      const idx = prev.findIndex(c => c.key === key);
+      if (idx !== -1) {
+        const updated = [...prev];
+        updated[idx] = { key, value: val };
+        return updated;
+      }
+      return [...prev, { key, value: val }];
+    });
+    
+    addShowcaseLog('log', `Storage Action: Set cookie "${key}" = "${val}"`);
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const deleteShowcaseCookie = (key: string) => {
+    setShowcaseCookies(prev => prev.filter(c => c.key !== key));
+    addShowcaseLog('log', `Storage Action: Deleted cookie "${key}"`);
+    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const addShowcaseCookie = () => {
+    if (!newKey) return;
+    setShowcaseCookies(prev => {
+      const idx = prev.findIndex(c => c.key === newKey);
+      if (idx !== -1) {
+        const updated = [...prev];
+        updated[idx] = { key: newKey, value: newVal };
+        return updated;
+      }
+      return [...prev, { key: newKey, value: newVal }];
+    });
+    addShowcaseLog('log', `Storage Action: Created cookie "${newKey}" = "${newVal}"`);
+    document.cookie = `${newKey}=${newVal}; path=/`;
+    window.dispatchEvent(new Event('storage'));
+    setNewKey('');
+    setNewVal('');
+  };
+
+  const deleteShowcaseLocal = (key: string) => {
+    setShowcaseLocalStorage(prev => prev.filter(c => c.key !== key));
+    addShowcaseLog('log', `Storage Action: Deleted localStorage key "${key}"`);
+    localStorage.removeItem(key);
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const addShowcaseLocal = () => {
+    if (!newKey) return;
+    setShowcaseLocalStorage(prev => {
+      const idx = prev.findIndex(c => c.key === newKey);
+      if (idx !== -1) {
+        const updated = [...prev];
+        updated[idx] = { key: newKey, value: newVal };
+        return updated;
+      }
+      return [...prev, { key: newKey, value: newVal }];
+    });
+    addShowcaseLog('log', `Storage Action: Set localStorage key "${newKey}" = "${newVal}"`);
+    localStorage.setItem(newKey, newVal);
+    window.dispatchEvent(new Event('storage'));
+    setNewKey('');
+    setNewVal('');
+  };
+
+  const handleFinishChange = (finish: 'gray' | 'silver') => {
+    setProductFinish(finish);
+    const finishName = finish === 'gray' ? 'Space Gray' : 'Silver';
+    console.log('Action: Select Finish', { finish: finishName });
+    addShowcaseLog('log', 'Action: Select Finish', { finish: finishName });
+  };
+
+  const handleStandChange = (stand: 'tilt' | 'height') => {
+    setProductStand(stand);
+    const standName = stand === 'tilt' ? 'Tilt-adjustable' : 'Tilt & Height adjustable';
+    console.log('Action: Select Stand', { stand: standName, price: stand === 'tilt' ? 1599 : 1999 });
+    addShowcaseLog('log', 'Action: Select Stand', { stand: standName, price: stand === 'tilt' ? 1599 : 1999 });
+  };
+
+  const clearShowcaseLogs = () => {
+    setShowcaseLogs([]);
+    setShowcaseRequests([]);
+    setCartCount(0);
+  };
+
+  return (
+<div>
+            {/* Marketplace-inspired Starry Hero Section */}
+            <div className="hero-marketplace-container">
+              <div className="hero-stars-glow"></div>
+              
+              <section className="hero-section hero-grid-layout">
+                <div className="hero-left-content">
+                  <div className="pill-announcement">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.85 }}>
+                      <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3Z" />
+                    </svg>
+                    <span>OmniConsole 1.0</span>
+                  </div>
+                  <h1 className="hero-title">
+                    Console. Network. Storage. <span>Inside your viewport.</span>
+                  </h1>
+                  <p className="hero-subtitle">
+                    A minimalistic, zero-dependency client-side developer toolbar. Built in pure TypeScript, gzipped under 13KB. Designed for mobile, PWAs, embedded webviews, and layout debugging.
+                  </p>
+                  
+                  <div className="hero-action-row">
+                    <button className="btn-secondary" onClick={() => { navigate('/docs'); }}>Read Docs</button>
+
+                    <div className="npm-install-box" onClick={() => handleCopy('npm install omniconsole', 'hero-npm')}>
+                      <span>$ npm install omniconsole</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      {copiedId === 'hero-npm' && <span style={{ color: '#10b981', marginLeft: '6px', fontSize: '11px' }}>Copied!</span>}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="hero-right-content">
+                  {/* Glowing Concentric Ripple Graphic */}
+                  <div className="hero-ripple-graphic">
+                    <div className="ripple-capsule cap-5"></div>
+                    <div className="ripple-capsule cap-4"></div>
+                    <div className="ripple-capsule cap-3"></div>
+                    <div className="ripple-capsule cap-2"></div>
+                    <div className="ripple-capsule cap-1"></div>
+                    <button className="btn-marketplace" onClick={() => navigate('/playground')}>
+                      <span>TRY PLAYGROUND</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modern Ecosystem Integration Strip */}
+                <div className="hero-integrations">
+                  <span className="integrations-title">TRUSTED BY DEVELOPERS ACROSS THE MODERN STACK</span>
+                  <div className="integrations-logos">
+                    <div className="logo-item" title="React">
+                      <svg width="20" height="20" viewBox="-11.5 -10.2 23 20.4" fill="none" stroke="currentColor" strokeWidth="1.2">
+                        <circle cx="0" cy="0" r="1.5" fill="currentColor"/>
+                        <ellipse rx="11" ry="4.2"/>
+                        <ellipse rx="11" ry="4.2" transform="rotate(60)"/>
+                        <ellipse rx="11" ry="4.2" transform="rotate(120)"/>
+                      </svg>
+                      <span>React</span>
+                    </div>
+                    <div className="logo-item" title="Vue">
+                      <svg width="20" height="20" viewBox="0 0 256 221" fill="currentColor">
+                        <path d="M128 220.8L0 0h51.2L128 132.5L204.8 0H256L128 220.8z"/>
+                        <path d="M128 171.7L42.5 24h45.3l40.2 68.8L168.2 24h45.3L128 171.7z" opacity="0.7"/>
+                      </svg>
+                      <span>Vue</span>
+                    </div>
+                    <div className="logo-item" title="Svelte">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.8 14.5c-1.3 0-2.4-1.1-2.4-2.4s1.1-2.4 2.4-2.4h3.6c.7 0 1.2-.5 1.2-1.2s-.5-1.2-1.2-1.2H10.2c-.3 0-.6-.3-.6-.6s.3-.6.6-.6h3.6c1.3 0 2.4 1.1 2.4 2.4s-1.1 2.4-2.4 2.4h-3.6c-.7 0-1.2.5-1.2 1.2s.5 1.2 1.2 1.2h3.6c.3 0 .6.3.6.6s-.3.6-.6.6h-3.6z"/>
+                      </svg>
+                      <span>Svelte</span>
+                    </div>
+                    <div className="logo-item" title="TypeScript">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="2" y="2" width="20" height="20" rx="3" fill="none" stroke="currentColor" strokeWidth="1.8"/>
+                        <path d="M11 8H6v2h2v6h2v-6h2V8zm8 2.5c0-1.5-1.2-2.5-3-2.5-1.8 0-3 1-3 2.5s1 2 2.5 2.5c1 .3 1.5.7 1.5 1.2 0 .6-.6 1-1.5 1-1 0-1.8-.4-2.2-1l-1.5 1c.8 1.2 2 2 3.7 2 2 0 3.2-1 3.2-2.5s-1-2-2.5-2.5c-1-.3-1.5-.7-1.5-1.2 0-.5.5-.8 1.2-.8.8 0 1.3.3 1.6.8z"/>
+                      </svg>
+                      <span>TypeScript</span>
+                    </div>
+                    <div className="logo-item" title="Vite">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21.54 2.9a.5.5 0 0 0-.77-.07L12 11.23 3.23 2.83a.5.5 0 0 0-.77.07L.17 19.38a.5.5 0 0 0 .61.71L12 16.5l11.22 3.59a.5.5 0 0 0 .61-.71z"/>
+                        <path d="M12.5 6.5l3.5 5.5h-5.5l2-5.5z" fill="#000" opacity="0.3"/>
+                      </svg>
+                      <span>Vite</span>
+                    </div>
+                    <div className="logo-item" title="Next.js">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M16 16L9 8v8"/>
+                        <path d="M15.5 11.5L12.5 15"/>
+                      </svg>
+                      <span>Next.js</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div className="section-container" style={{ paddingTop: '60px' }}>
+              {/* Interactive Live Demo Viewport */}
+              <h2 className="feature-section-title" style={{ fontSize: '28px', margin: '40px 0 10px 0' }}>Live Interactive Showcase</h2>
+              <p className="feature-section-subtitle" style={{ fontSize: '15px', marginBottom: '40px' }}>
+                Interact with the mobile screen on the left to fire network requests and log actions. Inspect events in real-time inside the simulated OmniConsole interface on the right.
+              </p>
+              
+              <section className="mock-viewport-showcase">
+                <div className="mock-window-header">
+                  <div className="dot dot-red"></div>
+                  <div className="dot dot-yellow"></div>
+                  <div className="dot dot-green"></div>
+                </div>
+                <div className="mock-window-body">
+                  {/* LEFT PANEL: CSS iPhone frame with OmniShop */}
+                  <div className="showcase-left-panel">
+                    <div className={`iphone-mockup finish-${productFinish}`}>
+                      <div className="iphone-notch"></div>
+                      <div className="iphone-status-bar">
+                        <span>9:41</span>
+                        <div className="iphone-status-icons">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.07 19.58 10.47 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"></path></svg>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"></path></svg>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17 5H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm-1 16H4V9h12v12z"></path></svg>
+                        </div>
+                      </div>
+                      
+                      <div className="iphone-screen">
+                        <div className="store-header">
+                          <span className="store-logo">OMNISHOP</span>
+                          <div className="store-cart-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <circle cx="9" cy="21" r="1"></circle>
+                              <circle cx="20" cy="21" r="1"></circle>
+                              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            {cartCount > 0 && <span className="store-cart-badge">{cartCount}</span>}
+                          </div>
+                        </div>
+
+                        <div className={`product-visual finish-${productFinish}`}>
+                          <div className="display-screen">
+                            <div className="display-screen-reflection"></div>
+                            <div className="display-screen-wallpaper"></div>
+                          </div>
+                          <div className="display-stand"></div>
+                          <div className="display-base"></div>
+                        </div>
+
+                        <div className="store-meta">
+                          <span className="store-meta-tag">Studio Displays</span>
+                          <h4 className="store-product-title">Apple Studio Display</h4>
+                        </div>
+
+                        <div className="store-options-block">
+                          <div>
+                            <span className="store-option-label">Finish</span>
+                            <div className="finish-circles">
+                              <div className={`finish-circle circle-gray ${productFinish === 'gray' ? 'active' : ''}`} onClick={() => handleFinishChange('gray')}></div>
+                              <div className={`finish-circle circle-silver ${productFinish === 'silver' ? 'active' : ''}`} onClick={() => handleFinishChange('silver')}></div>
+                            </div>
+                          </div>
+                          
+                          <div style={{ marginTop: '4px' }}>
+                            <span className="store-option-label">Stand Option</span>
+                            <div className="stand-pills">
+                              <div className={`stand-pill ${productStand === 'tilt' ? 'active' : ''}`} onClick={() => handleStandChange('tilt')}>Tilt</div>
+                              <div className={`stand-pill ${productStand === 'height' ? 'active' : ''}`} onClick={() => handleStandChange('height')}>Height</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="store-price-row">
+                          <span className="store-price-title">Subtotal</span>
+                          <span className="store-price-val">${productStand === 'tilt' ? '1,599.00' : '1,999.00'}</span>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: 'auto' }}>
+                          <button 
+                            className="oc-btn-playground oc-btn-playground-primary" 
+                            style={{ width: '100%', margin: 0, padding: '8px 12px', fontSize: '11px', borderRadius: '6px' }} 
+                            onClick={triggerDemoLog}
+                          >
+                            Add to Cart
+                          </button>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                            <button className="oc-btn-playground" style={{ margin: 0, padding: '7px 4px', fontSize: '10px', borderRadius: '6px' }} onClick={triggerDemoWarn}>Warn Option</button>
+                            <button 
+                              className="oc-btn-playground" 
+                              style={{ margin: 0, padding: '7px 4px', fontSize: '10px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }} 
+                              onClick={triggerDemoFetch}
+                              disabled={isSyncing}
+                            >
+                              {isSyncing ? 'Syncing...' : 'Fetch Catalog'}
+                            </button>
+                          </div>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                            <button className="oc-btn-playground" style={{ margin: 0, padding: '7px 4px', fontSize: '10px', borderRadius: '6px', color: '#f87171', borderColor: 'rgba(248, 113, 113, 0.2)' }} onClick={triggerDemoError}>Error 404</button>
+                            <button className="oc-btn-playground" style={{ margin: 0, padding: '7px 4px', fontSize: '10px', borderRadius: '6px', color: '#a78bfa', borderColor: 'rgba(167, 139, 250, 0.2)' }} onClick={triggerDemoCookie}>Set Cookie</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* RIGHT PANEL: Simulated OmniConsole UI */}
+                  <div className="showcase-right-panel">
+                    <div className="mock-console-nav">
+                      <div className="mock-console-tabs">
+                        <div className={`mock-console-tab ${showcaseActiveTab === 'console' ? 'active' : ''}`} onClick={() => setShowcaseActiveTab('console')}>
+                          <span>Console</span>
+                          {showcaseLogs.length > 0 && <span className="mock-console-tab-badge">{showcaseLogs.length}</span>}
+                        </div>
+                        <div className={`mock-console-tab ${showcaseActiveTab === 'network' ? 'active' : ''}`} onClick={() => setShowcaseActiveTab('network')}>
+                          <span>Network</span>
+                          {showcaseRequests.length > 0 && <span className="mock-console-tab-badge">{showcaseRequests.length}</span>}
+                        </div>
+                        <div className={`mock-console-tab ${showcaseActiveTab === 'storage' ? 'active' : ''}`} onClick={() => setShowcaseActiveTab('storage')}>
+                          <span>Storage</span>
+                        </div>
+                      </div>
+                      
+                      <button className="mock-console-clear-btn" title="Clear Console" onClick={clearShowcaseLogs}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                    </div>
+
+                    {showcaseActiveTab === 'console' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+                        <div className="mock-console-sub-bar">
+                          <span className={`mock-console-filter-pill ${showcaseLogFilter === 'all' ? 'active' : ''}`} onClick={() => setShowcaseLogFilter('all')}>All</span>
+                          <span className={`mock-console-filter-pill ${showcaseLogFilter === 'logs' ? 'active' : ''}`} onClick={() => setShowcaseLogFilter('logs')}>Logs</span>
+                          <span className={`mock-console-filter-pill ${showcaseLogFilter === 'warns' ? 'active' : ''}`} onClick={() => setShowcaseLogFilter('warns')}>Warnings</span>
+                          <span className={`mock-console-filter-pill ${showcaseLogFilter === 'errors' ? 'active' : ''}`} onClick={() => setShowcaseLogFilter('errors')}>Errors</span>
+                        </div>
+                        
+                        <div className="mock-console-content">
+                          {showcaseLogs
+                            .filter(log => {
+                              if (showcaseLogFilter === 'all') return true;
+                              if (showcaseLogFilter === 'logs') return log.type === 'log';
+                              if (showcaseLogFilter === 'warns') return log.type === 'warn';
+                              if (showcaseLogFilter === 'errors') return log.type === 'error';
+                              return true;
+                            })
+                            .map(log => (
+                              <div key={log.id} className={`mock-log-item ${log.type}`} onClick={() => log.data && setExpandedLogId(expandedLogId === log.id ? null : log.id)}>
+                                <div className="mock-log-header-row">
+                                  <div className="mock-log-meta">
+                                    {log.data ? (
+                                      <span className={`mock-log-caret ${expandedLogId === log.id ? 'expanded' : ''}`} style={{ display: 'inline-block' }}>▶</span>
+                                    ) : (
+                                      <span style={{ width: '10px', display: 'inline-block' }}></span>
+                                    )}
+                                    <span className="mock-log-time" style={{ color: '#555558', marginRight: '6px' }}>{log.timestamp}</span>
+                                    <span className="mock-log-text">{log.text}</span>
+                                  </div>
+                                  <span className="mock-log-origin" style={{ fontSize: '10px', color: '#444446' }}>{log.file}</span>
+                                </div>
+                                {log.data && expandedLogId === log.id && (
+                                  <div className="json-tree-container" onClick={(e) => e.stopPropagation()}>
+                                    <pre className="json-tree-code">
+                                      {JSON.stringify(log.data, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          {showcaseLogs.length === 0 && (
+                            <div style={{ padding: '40px 0', color: '#555558', textAlign: 'center' }}>
+                              Console is empty. Trigger events on the phone viewport.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {showcaseActiveTab === 'network' && (
+                      <div className="mock-console-content">
+                        <div className="network-table-header">
+                          <span>Name</span>
+                          <span>Method</span>
+                          <span>Status</span>
+                          <span>Latency</span>
+                        </div>
+                        {showcaseRequests.map(req => (
+                          <div key={req.id} className="network-row-container">
+                            <div className={`network-table-row ${req.status >= 400 ? 'error-row' : ''}`} onClick={() => req.status !== 0 && setExpandedRequestId(expandedRequestId === req.id ? null : req.id)}>
+                              <span className="network-col-url">{req.url.replace('https://api.omnishop.io/v1/', '')}</span>
+                              <span className="network-col-method" style={{ color: req.method === 'POST' ? '#a78bfa' : '#38bdf8', fontWeight: 'bold' }}>{req.method}</span>
+                              <span className={`network-col-status ${req.status === 200 ? 'success' : req.status === 0 ? 'pending' : 'fail'}`}>
+                                {req.status === 0 ? 'pending' : req.status}
+                              </span>
+                              <span className="network-col-latency">{req.latency}</span>
+                            </div>
+                            {expandedRequestId === req.id && req.status !== 0 && (
+                              <div className="network-details-pane">
+                                <div className="network-details-tab-content">
+                                  <div className="network-meta-pair">
+                                    <span className="network-meta-key">Request URL:</span>
+                                    <span className="network-meta-val" style={{ color: '#ffffff', wordBreak: 'break-all' }}>{req.url}</span>
+                                  </div>
+                                  <div className="network-meta-pair">
+                                    <span className="network-meta-key">Status:</span>
+                                    <span className="network-meta-val" style={{ color: req.status === 200 ? '#10b981' : '#f87171', fontWeight: 'bold' }}>{req.status}</span>
+                                  </div>
+                                  <div className="network-meta-pair">
+                                    <span className="network-meta-key">Latency:</span>
+                                    <span className="network-meta-val" style={{ color: '#ffffff' }}>{req.latency}</span>
+                                  </div>
+                                  <div className="network-meta-pair">
+                                    <span className="network-meta-key">Payload Size:</span>
+                                    <span className="network-meta-val" style={{ color: '#ffffff' }}>{req.size}</span>
+                                  </div>
+                                  {req.response && (
+                                    <div style={{ marginTop: '8px' }}>
+                                      <div style={{ color: '#86868b', marginBottom: '4px', fontWeight: 600 }}>Response JSON:</div>
+                                      <pre className="json-tree-container" style={{ margin: 0 }}>
+                                        <code className="json-tree-code">{JSON.stringify(req.response, null, 2)}</code>
+                                      </pre>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {showcaseActiveTab === 'storage' && (
+                      <div className="mock-console-content">
+                        <div className="storage-layout">
+                          <div className="storage-mini-tabs">
+                            <span className={`storage-mini-tab ${showcaseStorageTab === 'cookies' ? 'active' : ''}`} onClick={() => setShowcaseStorageTab('cookies')}>Cookies</span>
+                            <span className={`storage-mini-tab ${showcaseStorageTab === 'local' ? 'active' : ''}`} onClick={() => setShowcaseStorageTab('local')}>LocalStorage</span>
+                          </div>
+
+                          {showcaseStorageTab === 'cookies' ? (
+                            <table className="storage-table">
+                              <thead>
+                                <tr>
+                                  <th>Key</th>
+                                  <th>Value</th>
+                                  <th style={{ width: '30px' }}></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {showcaseCookies.map(cookie => (
+                                  <tr key={cookie.key}>
+                                    <td className="storage-key-td">{cookie.key}</td>
+                                    <td>{cookie.value}</td>
+                                    <td>
+                                      <button className="storage-delete-btn" title="Delete Cookie" onClick={() => deleteShowcaseCookie(cookie.key)}>
+                                        🗑
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                                {showcaseCookies.length === 0 && (
+                                  <tr>
+                                    <td colSpan={3} style={{ color: '#555558', textAlign: 'center', padding: '12px 0' }}>No cookies.</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          ) : (
+                            <table className="storage-table">
+                              <thead>
+                                <tr>
+                                  <th>Key</th>
+                                  <th>Value</th>
+                                  <th style={{ width: '30px' }}></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {showcaseLocalStorage.map(item => (
+                                  <tr key={item.key}>
+                                    <td className="storage-key-td">{item.key}</td>
+                                    <td>{item.value}</td>
+                                    <td>
+                                      <button className="storage-delete-btn" title="Delete Storage Item" onClick={() => deleteShowcaseLocal(item.key)}>
+                                        🗑
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                                {showcaseLocalStorage.length === 0 && (
+                                  <tr>
+                                    <td colSpan={3} style={{ color: '#555558', textAlign: 'center', padding: '12px 0' }}>LocalStorage empty.</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          )}
+
+                          <form className="storage-add-form" onSubmit={(e) => { e.preventDefault(); showcaseStorageTab === 'cookies' ? addShowcaseCookie() : addShowcaseLocal(); }}>
+                            <input 
+                              type="text" 
+                              placeholder="Key" 
+                              className="storage-add-input"
+                              value={newKey}
+                              onChange={(e) => setNewKey(e.target.value)}
+                            />
+                            <input 
+                              type="text" 
+                              placeholder="Value" 
+                              className="storage-add-input"
+                              value={newVal}
+                              onChange={(e) => setNewVal(e.target.value)}
+                            />
+                            <button type="submit" className="storage-add-btn">Add</button>
+                          </form>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Bento Grid layout features section */}
+              <section className="features-grid-section">
+                <h2 className="feature-section-title">Designed for simplicity. Built for speed.</h2>
+                <p className="feature-section-subtitle">
+                  Sleek hardware-accelerated layouts, high-performance serialization, and automated environment controls.
+                </p>
+                
+                <div className="features-bento-grid">
+                  {/* Card 1: Console Stream (2x1) */}
+                  <div className="bento-card bento-col-2">
+                    <div className="bento-card-bg-glow"></div>
+                    <div className="bento-text-block">
+                      <h3 className="bento-title">Console Stream Interception</h3>
+                      <p className="bento-desc">Intercepts error messages, runtime warnings, stack traces, and compiles them into a structured JSON explorer.</p>
+                    </div>
+                    <div className="bento-graphic-container">
+                      <div className="mini-console-bento">
+                        <div className="mini-log-bento"><span className="mini-badge-bento warn">WARN</span> Layout reflow detected (45fps) <span style={{ color: '#4b5563', marginLeft: 'auto' }}>scroll.ts:14</span></div>
+                        <div className="mini-log-bento"><span className="mini-badge-bento error">ERROR</span> Database connection timeout: ETIMEDOUT <span style={{ color: '#4b5563', marginLeft: 'auto' }}>db.ts:42</span></div>
+                        <div className="mini-log-bento" style={{ color: '#86868b' }}>&gt; AppState: {'{ user: "admin", role: "developer", status: "online" }'}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Application Storage (1x2) - Spans 2 rows! */}
+                  <div className="bento-card bento-row-2">
+                    <div className="bento-card-bg-glow"></div>
+                    <div className="bento-text-block">
+                      <h3 className="bento-title">Application Storage</h3>
+                      <p className="bento-desc">Read, update, and delete cookies, localStorage, and sessionStorage values reactively.</p>
+                    </div>
+                    <div className="bento-graphic-container">
+                      <span style={{ fontSize: '9px', color: '#555558', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Cookies</span>
+                      <table className="mini-storage-table-bento" style={{ marginBottom: '14px' }}>
+                        <tbody>
+                          <tr>
+                            <td className="storage-k">session_user</td>
+                            <td className="storage-v">"apple_dev"</td>
+                          </tr>
+                          <tr>
+                            <td className="storage-k">cart_count</td>
+                            <td className="storage-v">"3"</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <span style={{ fontSize: '9px', color: '#555558', fontWeight: 600, display: 'block', marginBottom: '4px' }}>LocalStorage</span>
+                      <table className="mini-storage-table-bento">
+                        <tbody>
+                          <tr>
+                            <td className="storage-k">theme_pref</td>
+                            <td className="storage-v">"dark"</td>
+                          </tr>
+                          <tr>
+                            <td className="storage-k">force_prod</td>
+                            <td className="storage-v">"false"</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Card 3: Network Latency Tracker (1x1) */}
+                  <div className="bento-card">
+                    <div className="bento-card-bg-glow"></div>
+                    <div className="bento-text-block">
+                      <h3 className="bento-title">Network Tracker</h3>
+                      <p className="bento-desc">Hooks into Fetch and XHR with timeline progress, request headers, payloads, and response sync.</p>
+                    </div>
+                    <div className="bento-graphic-container">
+                      <div className="mini-network-timeline-bento">
+                        <div className="mini-timeline-row-bento">
+                          <span>POST /api/cart</span>
+                          <div className="mini-timeline-bar-bento"><div className="mini-timeline-fill-bento green-35"></div></div>
+                          <span style={{ color: '#10b981' }}>45ms</span>
+                        </div>
+                        <div className="mini-timeline-row-bento">
+                          <span>GET /api/user/9</span>
+                          <div className="mini-timeline-bar-bento"><div className="mini-timeline-fill-bento red-15"></div></div>
+                          <span style={{ color: '#ef4444' }}>12ms</span>
+                        </div>
+                        <div className="mini-timeline-row-bento">
+                          <span>GET /api/catalog</span>
+                          <div className="mini-timeline-bar-bento"><div className="mini-timeline-fill-bento green-75"></div></div>
+                          <span style={{ color: '#10b981' }}>110ms</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 4: Size (1x1) */}
+                  <div className="bento-card">
+                    <div className="bento-card-bg-glow"></div>
+                    <div className="bento-text-block">
+                      <h3 className="bento-title">Zero Dependency Size</h3>
+                      <p className="bento-desc">Vanilla TS targeting native web bindings. Extremely light core footprint.</p>
+                    </div>
+                    <div className="bento-graphic-container">
+                      <div className="mini-comparison-bento">
+                        <div className="mini-compare-row">
+                          <div className="mini-compare-label"><span>OmniConsole (Gzip)</span><span>13 KB</span></div>
+                          <div className="mini-compare-track"><div className="mini-compare-fill" style={{ width: '13%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56,189,248,0.5)' }}></div></div>
+                        </div>
+                        <div className="mini-compare-row">
+                          <div className="mini-compare-label"><span>Eruda / vConsole</span><span>120 KB</span></div>
+                          <div className="mini-compare-track"><div className="mini-compare-fill" style={{ width: '90%', background: '#4b5563' }}></div></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 5: Virtualization (2x1) */}
+                  <div className="bento-card bento-col-2">
+                    <div className="bento-card-bg-glow"></div>
+                    <div className="bento-text-block">
+                      <h3 className="bento-title">60 FPS Virtual Scroll Engine</h3>
+                      <p className="bento-desc">Dynamically mounts visible viewport items when console or network logs scale up (tested with 10,000+ items) to preserve hardware memory rendering.</p>
+                    </div>
+                    <div className="bento-graphic-container">
+                      <div className="mini-fps-container-bento">
+                        <div className="mini-fps-line-bento"></div>
+                        <span className="mini-fps-label-bento">60 FPS</span>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                        <div className="mini-fps-bar-bento"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 6: Prod Guard (1x1) */}
+                  <div className="bento-card">
+                    <div className="bento-card-bg-glow"></div>
+                    <div className="bento-text-block">
+                      <h3 className="bento-title">Environment Guard</h3>
+                      <p className="bento-desc">Auto noop stub in production mode preventing performance leakageages unless forced.</p>
+                    </div>
+                    <div className="bento-graphic-container">
+                      <div className="mini-shield-container-bento">
+                        <div className="mini-shield-glow-bento"></div>
+                        <div className="mini-shield-layout-bento">
+                          <div className="mini-shield-box-bento">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                          </div>
+                          <div className="mini-envs-list-bento">
+                            <div className="mini-env-item-bento active">
+                              <span className="env-dot dev"></span>
+                              <span className="env-name">dev</span>
+                              <span className="env-status">Active</span>
+                            </div>
+                            <div className="mini-env-item-bento active">
+                              <span className="env-dot staging"></span>
+                              <span className="env-name">staging</span>
+                              <span className="env-status">Active</span>
+                            </div>
+                            <div className="mini-env-item-bento protected">
+                              <span className="env-dot prod"></span>
+                              <span className="env-name">prod</span>
+                              <span className="env-status">Guard</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+          
+  );
+}

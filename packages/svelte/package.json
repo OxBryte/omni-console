@@ -1,0 +1,19 @@
+{
+  "name": "@omniconsole/svelte",
+  "version": "1.0.0",
+  "description": "Svelte wrapper for OmniConsole",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "omniconsole": "^1.0.0",
+    "svelte": "^3.0.0 || ^4.0.0 || ^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "svelte": "^4.2.18"
+  }
+}

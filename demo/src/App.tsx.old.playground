@@ -1,0 +1,201 @@
+          <Route path="/playground" element={
+            <div className="playground-container">
+            <div className="playground-header">
+              <h1 className="playground-title">Developer Lab</h1>
+              <p className="playground-subtitle">Execute simulated telemetry calls, trace network activity, and trigger custom runtime intercepts.</p>
+            </div>
+
+            <div className="playground-grid">
+              {/* Card 1: Console Logging */}
+              <section className="playground-card">
+                <div className="playground-card-title-row">
+                  <span className="playground-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                  </span>
+                  <h3 className="playground-card-title">Console Logger</h3>
+                </div>
+                <p className="playground-card-desc">Emit standard debugger logs to the viewport console and verify custom tree visualizations.</p>
+                
+                <div className="playground-input-wrap">
+                  <span className="playground-input-icon">&gt;</span>
+                  <input
+                    type="text"
+                    className="playground-input-field"
+                    value={logText}
+                    onChange={(e) => setLogText(e.target.value)}
+                    placeholder="Enter console log content..."
+                  />
+                </div>
+
+                <div className="playground-btn-group">
+                  <button className="oc-btn-playground" style={{ padding: '8px 12px' }} onClick={triggerStringLog}>Log String</button>
+                  <button className="oc-btn-playground" style={{ color: '#38bdf8', padding: '8px 12px' }} onClick={triggerInfoLog}>Log Info</button>
+                  <button className="oc-btn-playground" style={{ color: '#fbbf24', padding: '8px 12px' }} onClick={triggerWarnLog}>Log Warn</button>
+                  <button className="oc-btn-playground" style={{ color: '#f87171', padding: '8px 12px' }} onClick={triggerErrorLog}>Log Error</button>
+                  <button className="oc-btn-playground" style={{ padding: '8px 12px' }} onClick={triggerComplexObjectLog}>Log Object</button>
+                  <button className="oc-btn-playground" style={{ padding: '8px 12px' }} onClick={triggerCircularLog}>Log Circular</button>
+                </div>
+              </section>
+
+              {/* Card 2: Network Telemetry */}
+              <section className="playground-card">
+                <div className="playground-card-title-row">
+                  <span className="playground-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  </span>
+                  <h3 className="playground-card-title">Network Telemetry</h3>
+                </div>
+                <p className="playground-card-desc">Simulate REST API request sequences to check header values and latency timing.</p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', marginTop: 'auto' }}>
+                  <div className="playground-action-row">
+                    <span className="playground-action-label"><span className="playground-status-dot active"></span>GET Fetch Call (200 Success)</span>
+                    <button className="oc-btn-playground" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={triggerFetchSuccess}>Fetch GET</button>
+                  </div>
+                  <div className="playground-action-row">
+                    <span className="playground-action-label"><span className="playground-status-dot error"></span>GET Fetch Call (404 Fail)</span>
+                    <button className="oc-btn-playground" style={{ padding: '6px 12px', fontSize: '11px', color: '#f87171' }} onClick={triggerFetchFail}>Fetch 404</button>
+                  </div>
+                  <div className="playground-action-row">
+                    <span className="playground-action-label"><span className="playground-status-dot active"></span>POST Fetch Request</span>
+                    <button className="oc-btn-playground" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={triggerFetchPost}>Fetch POST</button>
+                  </div>
+                  <div className="playground-action-row">
+                    <span className="playground-action-label"><span className="playground-status-dot"></span>XMLHttp Request (GET)</span>
+                    <button className="oc-btn-playground" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={triggerXhrSuccess}>Trigger XHR</button>
+                  </div>
+                  <div className="playground-action-row">
+                    <span className="playground-action-label"><span className="playground-status-dot warn"></span>Blacklisted Url Call</span>
+                    <button className="oc-btn-playground" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={triggerBlacklistedFetch}>Fetch telemetry</button>
+                  </div>
+                </div>
+              </section>
+
+              {/* Card 3: Storage Instrument */}
+              <section className="playground-card">
+                <div className="playground-card-title-row">
+                  <span className="playground-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></svg>
+                  </span>
+                  <h3 className="playground-card-title">Storage Instrument</h3>
+                </div>
+                <p className="playground-card-desc">Mutate storage key-values reactively to verify synchronization inside the Storage dashboard.</p>
+                
+                <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                  <div className="playground-input-wrap">
+                    <span className="playground-input-icon">K</span>
+                    <input
+                      type="text"
+                      className="playground-input-field"
+                      value={storageKey}
+                      onChange={(e) => setStorageKey(e.target.value)}
+                      placeholder="Key name"
+                    />
+                  </div>
+                  <div className="playground-input-wrap">
+                    <span className="playground-input-icon">V</span>
+                    <input
+                      type="text"
+                      className="playground-input-field"
+                      value={storageVal}
+                      onChange={(e) => setStorageVal(e.target.value)}
+                      placeholder="Value"
+                    />
+                  </div>
+                </div>
+
+                <div className="playground-btn-group" style={{ marginTop: 'auto' }}>
+                  <button className="oc-btn-playground" style={{ padding: '8px 12px' }} onClick={handleAddLocalStorage}>Add LocalStorage</button>
+                  <button className="oc-btn-playground" style={{ padding: '8px 12px' }} onClick={handleAddSessionStorage}>Add SessionStorage</button>
+                  <button className="oc-btn-playground" style={{ padding: '8px 12px' }} onClick={handleAddCookie}>Add Cookie</button>
+                </div>
+              </section>
+
+              {/* Card 4: Runtime Errors */}
+              <section className="playground-card playground-card-alert">
+                <div className="playground-card-title-row">
+                  <span className="playground-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  </span>
+                  <h3 className="playground-card-title" style={{ color: '#ef4444' }}>Exceptions & Crashes</h3>
+                </div>
+                <p className="playground-card-desc">Simulate fatal runtime exceptions and verify warning notifications in the console drawer.</p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', marginTop: 'auto' }}>
+                  <button 
+                    className="oc-btn-playground oc-btn-playground-error" 
+                    style={{ width: '100%', margin: 0, padding: '10px 14px' }} 
+                    onClick={triggerUncaughtException}
+                  >
+                    Throw Runtime Exception
+                  </button>
+                  <button 
+                    className="oc-btn-playground oc-btn-playground-error" 
+                    style={{ width: '100%', margin: 0, padding: '10px 14px' }} 
+                    onClick={triggerUnhandledRejection}
+                  >
+                    Trigger Promise Rejection
+                  </button>
+                </div>
+              </section>
+
+              {/* Card 5: Stress Testing (Spans 2 columns on desktop) */}
+              <section className="playground-card" style={{ gridColumn: 'span 2' }}>
+                <div className="playground-card-title-row">
+                  <span className="playground-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                  </span>
+                  <h3 className="playground-card-title">Stress Testing & Virtualization</h3>
+                </div>
+                <p className="playground-card-desc">Simulate massive logging loops to verify list virtualization rendering performance. Choose a scale below to log elements instantly.</p>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', margin: '12px 0 20px 0' }}>
+                  <input
+                    type="range"
+                    min="100"
+                    max="5000"
+                    step="100"
+                    style={{ flex: 1, accentColor: '#38bdf8', cursor: 'pointer' }}
+                    value={stressLogCount}
+                    onChange={(e) => setStressLogCount(Number(e.target.value))}
+                  />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: '#38bdf8', fontWeight: 'bold', width: '80px', textAlign: 'right' }}>
+                    {stressLogCount} items
+                  </span>
+                </div>
+
+                <div className="playground-btn-group" style={{ width: '100%' }}>
+                  <button 
+                    className="oc-btn-playground oc-btn-playground-primary" 
+                    style={{ width: '100%', margin: 0, padding: '12px 18px', borderRadius: '10px' }} 
+                    onClick={triggerStressTest}
+                  >
+                    Emit {stressLogCount} Logs Instantly
+                  </button>
+                </div>
+              </section>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer className="app-footer">
+        <div className="section-container footer-content">
+          <div className="footer-left">
+            <span className="footer-logo">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+              OmniConsole
+            </span>
+            <span className="footer-copy">© {new Date().getFullYear()} OmniConsole. All rights reserved.</span>
+          </div>
+          <div className="footer-links">
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://npmjs.com" target="_blank" rel="noopener noreferrer">NPM</a>
+            <span className="footer-link-item" onClick={() => { setCurrentView('docs'); setActiveDocSection('installation'); }}>Documentation</span>
+            <span className="footer-link-item" onClick={() => { setCurrentView('playground'); }}>Playground</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

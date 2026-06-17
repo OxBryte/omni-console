@@ -1,0 +1,24 @@
+{
+  "name": "omniconsole",
+  "version": "1.0.0",
+  "description": "Customizable, in-app developer toolbar (Console, Network, Application)",
+  "main": "./dist/omniconsole.umd.js",
+  "module": "./dist/omniconsole.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/omniconsole.mjs",
+      "require": "./dist/omniconsole.umd.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "watch": "vite build --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vite-plugin-dts": "^3.9.1"
+  }
+}

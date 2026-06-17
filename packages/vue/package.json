@@ -1,0 +1,19 @@
+{
+  "name": "@omniconsole/vue",
+  "version": "1.0.0",
+  "description": "Vue wrapper for OmniConsole",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "omniconsole": "^1.0.0",
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vue": "^3.4.27"
+  }
+}
