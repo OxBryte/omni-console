@@ -1048,7 +1048,7 @@ export default function PlaygroundView() {
                       <h3 className="profiler-section-title" style={{ fontSize: '12px', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>Simulator Event Feed</h3>
                       <p className="card-desc">Active trace list of events intercepted in the sandbox workspace.</p>
                       
-                      <div className="workbench-events-list" style={{ flex: 1, maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '10px' }}>
+                      <div className="workbench-events-list" style={{ flex: 1, maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '10px' }}>
                         {workbenchEvents.length === 0 ? (
                           <div style={{ color: '#555', textAlign: 'center', padding: '20px' }}>No events recorded.</div>
                         ) : (
