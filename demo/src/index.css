@@ -1530,6 +1530,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   margin-top: 4px;
+  table-layout: fixed;
 }
 .storage-table th,
 .storage-table td {
@@ -1537,6 +1538,8 @@ body {
   padding: 6px 8px;
   text-align: left;
   font-size: 10px;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 .storage-table th {
   color: #555558;
@@ -3753,6 +3756,18 @@ body {
   .btn-secondary {
     font-size: 13px;
     padding: 12px 20px;
+  }
+}
+
+@media (max-width: 360px) {
+  .iphone-mockup {
+    width: 240px !important;
+    height: 380px !important;
+    border-radius: 28px !important;
+    border-width: 8px !important;
+  }
+  .showcase-left-panel {
+    min-height: 420px !important;
   }
 }
 

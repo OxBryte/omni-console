@@ -864,6 +864,145 @@ function injectUIStyles() {
     .oc-mono {
       font-family: 'SF Mono', 'JetBrains Mono', Menlo, Monaco, Consolas, monospace;
     }
+
+    /* ── Mobile Responsive Overrides ── */
+    @media (max-width: 600px) {
+      .oc-panel.dock-left,
+      .oc-panel.dock-right {
+        width: 100% !important;
+        height: 100% !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+      }
+      .oc-panel.dock-left {
+        transform: translateX(-100%) !important;
+      }
+      .oc-panel.dock-left.open {
+        transform: translateX(0) !important;
+      }
+      .oc-panel.dock-right {
+        transform: translateX(100%) !important;
+      }
+      .oc-panel.dock-right.open {
+        transform: translateX(0) !important;
+      }
+      .oc-panel.dock-bottom {
+        height: 70vh !important;
+        max-height: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        border-radius: 12px 12px 0 0 !important;
+      }
+      .oc-panel.dock-free {
+        width: calc(100% - 16px) !important;
+        height: 70vh !important;
+        max-height: calc(100% - 70px) !important;
+        left: 8px !important;
+        top: auto !important;
+        bottom: 8px !important;
+        border-radius: 12px !important;
+        transform: translateY(120%) scale(1) !important;
+      }
+      .oc-panel.dock-free.open {
+        transform: translateY(0) scale(1) !important;
+      }
+      .oc-resize-handle,
+      .oc-resize-handle-se {
+        display: none !important;
+      }
+      .oc-header-controls {
+        display: none !important;
+      }
+      .oc-badge {
+        height: 32px !important;
+        padding: 0 10px 0 8px !important;
+        gap: 6px !important;
+      }
+      .oc-badge-label {
+        font-size: 10.5px !important;
+      }
+      .oc-badge-icon svg {
+        width: 44px !important;
+        height: 13px !important;
+      }
+
+      /* Console Logs */
+      .oc-log-row {
+        grid-template-columns: 46px 1fr !important;
+        gap: 4px 6px !important;
+        padding: 6px 10px !important;
+      }
+      .oc-log-meta {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        flex-direction: row !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 8px !important;
+        opacity: 0.55 !important;
+        padding-top: 1px !important;
+      }
+      .oc-log-caller {
+        max-width: 160px !important;
+      }
+
+      /* Network Tab */
+      .oc-network-split {
+        flex-direction: column !important;
+      }
+      .oc-network-list-panel {
+        border-right: none !important;
+        border-bottom: 1px solid var(--oc-border-color) !important;
+        flex: 1 !important;
+        height: 50% !important;
+        min-height: 180px !important;
+      }
+      .oc-network-details-panel {
+        flex: 1 !important;
+        height: 50% !important;
+      }
+
+      /* Application Tab */
+      .oc-app-tab-container {
+        flex-direction: column !important;
+      }
+      .oc-app-sidebar {
+        width: 100% !important;
+        height: auto !important;
+        flex-direction: row !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--oc-border-color) !important;
+        padding: 4px 8px !important;
+        gap: 4px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      .oc-app-sidebar::-webkit-scrollbar {
+        display: none !important;
+      }
+      .oc-app-sidebar-label {
+        display: none !important;
+      }
+      .oc-app-sidebar-item {
+        border-left: none !important;
+        border-bottom: 2px solid transparent !important;
+        border-radius: 4px !important;
+        margin-right: 0 !important;
+        padding: 6px 10px !important;
+      }
+      .oc-app-sidebar-item.active {
+        border-bottom-color: var(--oc-primary-color) !important;
+        background: rgba(228, 228, 231, 0.04) !important;
+      }
+      .oc-app-body {
+        flex: 1 !important;
+      }
+    }
   `;
 
   document.head.appendChild(style);
