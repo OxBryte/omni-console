@@ -1,6 +1,6 @@
 {
   "name": "omniconsole",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Customizable, in-app developer toolbar (Console, Network, Application)",
   "main": "./dist/omniconsole.umd.js",
   "module": "./dist/omniconsole.mjs",
