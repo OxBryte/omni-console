@@ -462,8 +462,6 @@ export default function PlaygroundView() {
           <div className="playground-container">
             {/* Playground Hero */}
             <div className="playground-hero" onMouseMove={handleHeroMouseMove}>
-              <div className="hero-grid-background"></div>
-              <div className="hero-grid-glow"></div>
               <div className="playground-hero-content">
                 <span className="pill-announcement" style={{ background: 'rgba(255, 255, 255, 0.03)', color: '#d4d4d8', borderColor: 'rgba(255, 255, 255, 0.08)' }}>Interactive Sandbox</span>
                 <h1 className="playground-hero-title">Developer Lab</h1>
