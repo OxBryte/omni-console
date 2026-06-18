@@ -3,6 +3,7 @@ import CodeEditor from '../components/CodeEditor';
 
 export default function DocsView() {
   const [activeDocSection, setActiveDocSection] = useState<'installation' | 'getting-started' | 'configuration' | 'react' | 'vue' | 'svelte' | 'security'>('installation');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -10,6 +11,19 @@ export default function DocsView() {
     const y = e.clientY - rect.top;
     e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
     e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+  };
+
+  const getFriendlySectionName = (sec: string) => {
+    switch (sec) {
+      case 'installation': return 'Installation';
+      case 'getting-started': return 'Quick Start';
+      case 'configuration': return 'Configuration API';
+      case 'react': return 'React';
+      case 'vue': return 'Vue';
+      case 'svelte': return 'Svelte';
+      case 'security': return 'Production Guard';
+      default: return 'Docs';
+    }
   };
 
   return (
@@ -34,19 +48,39 @@ export default function DocsView() {
               </div>
 
               <div className="section-container">
+              
+              {/* Mobile sub-navigation bar */}
+              <div className="docs-mobile-nav-bar">
+                <div className="docs-mobile-path">
+                  Docs <span className="docs-breadcrumb-sep">›</span> <span className="docs-mobile-current-title">{getFriendlySectionName(activeDocSection)}</span>
+                </div>
+                <button className="docs-mobile-menu-btn" onClick={() => setIsDrawerOpen(!isDrawerOpen)}>
+                  <span>Menu</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              {isDrawerOpen && (
+                <div className="docs-sidebar-backdrop" onClick={() => setIsDrawerOpen(false)}></div>
+              )}
+
               <div className="docs-container">
-              <aside className="docs-sidebar">
+              <aside className={`docs-sidebar ${isDrawerOpen ? 'open' : ''}`}>
                 <div className="docs-sidebar-group-label">Getting Started</div>
-                <div className={`docs-sidebar-item ${activeDocSection === 'installation' ? 'active' : ''}`} onClick={() => setActiveDocSection('installation')}><span className="sidebar-dot"></span>Installation</div>
-                <div className={`docs-sidebar-item ${activeDocSection === 'getting-started' ? 'active' : ''}`} onClick={() => setActiveDocSection('getting-started')}><span className="sidebar-dot"></span>Quick Start</div>
+                <div className={`docs-sidebar-item ${activeDocSection === 'installation' ? 'active' : ''}`} onClick={() => { setActiveDocSection('installation'); setIsDrawerOpen(false); }}><span className="sidebar-dot"></span>Installation</div>
+                <div className={`docs-sidebar-item ${activeDocSection === 'getting-started' ? 'active' : ''}`} onClick={() => { setActiveDocSection('getting-started'); setIsDrawerOpen(false); }}><span className="sidebar-dot"></span>Quick Start</div>
                 <div className="docs-sidebar-group-label">Reference</div>
-                <div className={`docs-sidebar-item ${activeDocSection === 'configuration' ? 'active' : ''}`} onClick={() => setActiveDocSection('configuration')}><span className="sidebar-dot"></span>Configuration API</div>
+                <div className={`docs-sidebar-item ${activeDocSection === 'configuration' ? 'active' : ''}`} onClick={() => { setActiveDocSection('configuration'); setIsDrawerOpen(false); }}><span className="sidebar-dot"></span>Configuration API</div>
                 <div className="docs-sidebar-group-label">Framework Guides</div>
-                <div className={`docs-sidebar-item ${activeDocSection === 'react' ? 'active' : ''}`} onClick={() => setActiveDocSection('react')}><span className="sidebar-dot"></span>React</div>
-                <div className={`docs-sidebar-item ${activeDocSection === 'vue' ? 'active' : ''}`} onClick={() => setActiveDocSection('vue')}><span className="sidebar-dot"></span>Vue</div>
-                <div className={`docs-sidebar-item ${activeDocSection === 'svelte' ? 'active' : ''}`} onClick={() => setActiveDocSection('svelte')}><span className="sidebar-dot"></span>Svelte</div>
+                <div className={`docs-sidebar-item ${activeDocSection === 'react' ? 'active' : ''}`} onClick={() => { setActiveDocSection('react'); setIsDrawerOpen(false); }}><span className="sidebar-dot"></span>React</div>
+                <div className={`docs-sidebar-item ${activeDocSection === 'vue' ? 'active' : ''}`} onClick={() => { setActiveDocSection('vue'); setIsDrawerOpen(false); }}><span className="sidebar-dot"></span>Vue</div>
+                <div className={`docs-sidebar-item ${activeDocSection === 'svelte' ? 'active' : ''}`} onClick={() => { setActiveDocSection('svelte'); setIsDrawerOpen(false); }}><span className="sidebar-dot"></span>Svelte</div>
                 <div className="docs-sidebar-group-label">Security</div>
-                <div className={`docs-sidebar-item ${activeDocSection === 'security' ? 'active' : ''}`} onClick={() => setActiveDocSection('security')}><span className="sidebar-dot"></span>Production Guard</div>
+                <div className={`docs-sidebar-item ${activeDocSection === 'security' ? 'active' : ''}`} onClick={() => { setActiveDocSection('security'); setIsDrawerOpen(false); }}><span className="sidebar-dot"></span>Production Guard</div>
               </aside>
 
               <div className="docs-content">

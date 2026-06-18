@@ -2083,6 +2083,9 @@ body {
 }
 
 /* Documentation Layout */
+.docs-mobile-nav-bar {
+  display: none;
+}
 .docs-container {
   display: flex;
   gap: 48px;
@@ -3402,26 +3405,27 @@ body {
     font-size: 28px !important;
   }
   .features-bento-grid {
-    grid-template-columns: 1fr 1fr;
-    grid-auto-rows: 220px;
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: auto !important;
+    gap: 16px !important;
   }
+  .bento-col-2,
   .bento-row-2 {
-    grid-template-columns: 1fr 1fr;
+    grid-column: span 1 !important;
+    grid-row: span 1 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  .bento-card {
+    min-height: auto !important;
+    height: auto !important;
+  }
+  .bento-row-2 .bento-graphic-container {
+    height: 180px !important;
   }
 }
 
 @media (max-width: 600px) {
-  .features-bento-grid {
-    grid-template-columns: 1fr;
-    grid-auto-rows: auto;
-    gap: 12px;
-  }
-  .bento-row-2 {
-    grid-template-columns: 1fr;
-  }
-  .bento-card {
-    min-height: 180px;
-  }
   .bento-text-block {
     padding: 16px 16px 0;
   }
@@ -3506,60 +3510,130 @@ body {
     gap: 0;
     padding-top: 32px;
   }
-  .docs-sidebar {
-    width: 100% !important;
+  /* Sticky Mobile Sub-Navbar */
+  .docs-mobile-nav-bar {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 16px !important;
+    background: rgba(10, 10, 12, 0.75) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     position: sticky !important;
     top: 56px !important;
-    z-index: 100 !important;
-    background: rgba(9, 9, 11, 0.9) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border-right: none !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    padding: 0 16px !important;
-    margin: 0 0 24px 0 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    gap: 16px !important;
-    align-items: center !important;
-    height: 48px !important;
-    scrollbar-width: none !important;
-    -webkit-overflow-scrolling: touch !important;
+    z-index: 1000 !important;
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 24px;
   }
-  .docs-sidebar::-webkit-scrollbar {
-    display: none !important;
+  .docs-mobile-path {
+    font-size: 13px !important;
+    color: #71717a !important;
+    font-weight: 500 !important;
+  }
+  .docs-mobile-current-title {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+  }
+  .docs-mobile-menu-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    color: #e4e4e7 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+  }
+  .docs-mobile-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+  }
+
+  /* Drawer Backdrop */
+  .docs-sidebar-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9998 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  /* Drawer Sidebar Layout */
+  .docs-sidebar {
+    width: 260px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: -280px !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    background: #09090b !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 32px 24px !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    overflow-y: auto !important;
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-sizing: border-box !important;
+  }
+  .docs-sidebar.open {
+    left: 0 !important;
   }
   .docs-sidebar-group-label {
-    display: none !important;
+    display: block !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    color: #52525b !important;
+    text-transform: uppercase !important;
+    margin: 20px 0 8px 12px !important;
+  }
+  .docs-sidebar-group-label:first-child {
+    margin-top: 10px !important;
   }
   .docs-sidebar-item {
     font-size: 13px !important;
-    padding: 14px 0 !important;
-    border-radius: 0 !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
     background: transparent !important;
     color: #86868b !important;
-    border-bottom: 2px solid transparent !important;
-    white-space: nowrap !important;
-    display: inline-flex !important;
+    border-bottom: none !important;
+    white-space: normal !important;
+    display: flex !important;
     align-items: center !important;
-    height: 100% !important;
-    margin: 0 !important;
+    height: auto !important;
+    margin: 2px 0 !important;
     transition: all 0.2s ease-in-out !important;
   }
   .docs-sidebar-item:hover {
     color: #ffffff !important;
-    background: transparent !important;
+    background: rgba(255, 255, 255, 0.02) !important;
   }
   .docs-sidebar-item.active {
     color: #38bdf8 !important;
-    border-bottom-color: #38bdf8 !important;
-    background: transparent !important;
+    background: rgba(56, 189, 248, 0.04) !important;
     font-weight: 600 !important;
   }
   .docs-sidebar-item .sidebar-dot {
-    display: none !important;
+    width: 5px !important;
+    height: 5px !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    margin-right: 8px !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+  }
+  .docs-sidebar-item.active .sidebar-dot {
+    background: #38bdf8 !important;
   }
   .docs-h1 {
     font-size: 26px;
