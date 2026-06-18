@@ -4,16 +4,33 @@ import CodeEditor from '../components/CodeEditor';
 export default function DocsView() {
   const [activeDocSection, setActiveDocSection] = useState<'installation' | 'getting-started' | 'configuration' | 'react' | 'vue' | 'svelte' | 'security'>('installation');
 
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+  };
+
   return (
             <div>
               {/* Docs Hero Strip */}
-              <div className="docs-page-hero">
-                <div className="docs-page-hero-eyebrow">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3Z"/></svg>
-                  Documentation
+              <div className="docs-page-hero" onMouseMove={handleHeroMouseMove}>
+                <div className="hero-stars-glow"></div>
+                <div className="hero-grid-glow"></div>
+
+                <div className="docs-page-hero-content">
+                  <div className="pill-announcement">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.85 }}>
+                      <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3Z" />
+                    </svg>
+                    <span>Documentation</span>
+                  </div>
+                  <h1 className="docs-page-hero-title">
+                    Developer <span>Docs</span>
+                  </h1>
+                  <p className="docs-page-hero-subtitle">Everything you need to instrument, configure, and deploy OmniConsole in any stack.</p>
                 </div>
-                <h1 className="docs-page-hero-title">Developer Docs</h1>
-                <p className="docs-page-hero-subtitle">Everything you need to instrument, configure, and deploy OmniConsole in any stack.</p>
               </div>
 
               <div className="section-container">
