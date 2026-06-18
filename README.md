@@ -1,6 +1,10 @@
 # OmniConsole
 
+[![Documentation](https://img.shields.io/badge/docs-console.oxbryte.xyz-blue)](https://console.oxbryte.xyz)
+
 **OmniConsole** is an open-source, ultra-lightweight, customizable in-app developer toolbar distributed as a zero-dependency npm package. It mirrors the core features of standard browser developer tools—specifically the **Console**, **Network**, and **Application (Storage)** tabs—directly within the application viewport.
+
+Official Documentation: [console.oxbryte.xyz](https://console.oxbryte.xyz)
 
 ---
 

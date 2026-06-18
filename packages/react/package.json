@@ -2,6 +2,15 @@
   "name": "@omniconsole/react",
   "version": "1.0.1",
   "description": "React wrapper for OmniConsole",
+  "homepage": "https://console.oxbryte.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OxBryte/omni-console.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/OxBryte/omni-console/issues"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

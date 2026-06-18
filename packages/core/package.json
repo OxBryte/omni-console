@@ -2,6 +2,15 @@
   "name": "omniconsole",
   "version": "1.0.1",
   "description": "Customizable, in-app developer toolbar (Console, Network, Application)",
+  "homepage": "https://console.oxbryte.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OxBryte/omni-console.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/OxBryte/omni-console/issues"
+  },
   "main": "./dist/omniconsole.umd.js",
   "module": "./dist/omniconsole.mjs",
   "types": "./dist/index.d.ts",
