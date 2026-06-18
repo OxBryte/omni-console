@@ -302,6 +302,9 @@ export default function LandingView() {
                   </p>
                   
                   <div className="hero-action-row" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button className="btn-primary" onClick={() => navigate('/playground')}>
+                      Try Playground
+                    </button>
                     <button className="btn-secondary" onClick={() => { navigate('/docs'); }}>
                       Read Docs
                     </button>
