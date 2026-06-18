@@ -301,10 +301,15 @@ export default function LandingView() {
                     A minimalistic, zero-dependency client-side developer toolbar. Built in pure TypeScript, gzipped under 13KB. Designed for mobile, PWAs, embedded webviews, and layout debugging.
                   </p>
                   
-                  <div className="hero-action-row">
-                    <button className="btn-secondary" onClick={() => { navigate('/docs'); }}>Read Docs</button>
+                  <div className="hero-action-row" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button className="btn-primary" onClick={() => { navigate('/playground'); }} style={{ background: '#e4e4e7', color: '#18181b', border: 'none', fontWeight: 700 }}>
+                      Try Playground
+                    </button>
+                    <button className="btn-secondary" onClick={() => { navigate('/docs'); }}>
+                      Read Docs
+                    </button>
 
-                    <div className="npm-install-box" onClick={() => handleCopy('npm install omniconsole', 'hero-npm')}>
+                    <div className="npm-install-box" onClick={() => handleCopy('npm install omniconsole', 'hero-npm')} style={{ margin: 0 }}>
                       <span>$ npm install omniconsole</span>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
