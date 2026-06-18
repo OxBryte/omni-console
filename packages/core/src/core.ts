@@ -23,7 +23,14 @@ export function initOmniConsole(options: OmniConsoleOptions = {}) {
   } catch (e) {}
 
   const isProduction = isNodeProd || isViteProd;
-  const disableInProd = isProduction && !options.forceProd;
+  
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+     window.location.hostname === '127.0.0.1' ||
+     window.location.hostname.endsWith('.local'));
+
+  const disableInProd = isProduction && !options.forceProd && !isLocalhost;
 
   if (disableInProd || options.enabled === false) {
     // Return no-op stubs for production safety
