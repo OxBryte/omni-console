@@ -3034,7 +3034,8 @@ body {
 .keychain-table-container {
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background: rgba(0, 0, 0, 0.15);
 }
 .keychain-table {
@@ -3462,6 +3463,30 @@ body {
 
 /* ── DOCS PAGE ── */
 @media (max-width: 900px) {
+  /* Interactive Showcase Responsiveness */
+  .mock-viewport-showcase {
+    margin: 40px auto 60px auto;
+    border-radius: 12px;
+  }
+  .mock-window-body {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+  .showcase-left-panel {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 32px 16px;
+    height: auto;
+    min-height: 480px;
+    background: radial-gradient(circle at center, #111115 0%, #000000 100%);
+  }
+  .showcase-right-panel {
+    flex: none;
+    width: 100%;
+    height: 480px;
+  }
+
   .docs-page-hero {
     padding: 80px 20px 48px;
   }
@@ -3708,6 +3733,16 @@ body {
 
 /* ── GLOBAL UTILITIES ── */
 @media (max-width: 480px) {
+  .script-selector-row {
+    flex-wrap: wrap !important;
+  }
+  .script-selector-row select {
+    width: 100% !important;
+  }
+  .script-selector-row button {
+    width: 100% !important;
+  }
+
   .pill-announcement {
     font-size: 10px;
     padding: 3px 8px;
