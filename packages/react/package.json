@@ -2,6 +2,14 @@
   "name": "@omniconsole/react",
   "version": "1.0.3",
   "description": "React wrapper for OmniConsole",
+  "license": "MIT",
+  "keywords": [
+    "developer-toolbar",
+    "console",
+    "react",
+    "react-console",
+    "omniconsole"
+  ],
   "homepage": "https://console.oxbryte.xyz",
   "repository": {
     "type": "git",

@@ -32,3 +32,10 @@ Use the custom svelte action directive on your main layout container:
 ```
 
 For detailed options, theme customization, and API parameters, please visit [console.oxbryte.xyz](https://console.oxbryte.xyz).
+
+---
+
+## Keywords
+
+`developer-toolbar`, `svelte`, `svelte-console`, `mobile-debugging`, `devtools`, `in-app-console`, `debugging`
+

@@ -126,3 +126,10 @@ To preview the landing page, documentation, and play with event triggers:
    npm run dev
    ```
 3. Open [http://localhost:5173/](http://localhost:5173/) in your web browser.
+
+---
+
+## Keywords
+
+`developer-toolbar`, `in-app-console`, `mobile-debugging`, `web-console`, `devtools`, `react`, `vue`, `svelte`, `debugging`, `network-inspector`, `storage-explorer`
+

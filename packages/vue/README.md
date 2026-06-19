@@ -35,3 +35,10 @@ app.mount('#app');
 ```
 
 For detailed options, theme customization, and API parameters, please visit [console.oxbryte.xyz](https://console.oxbryte.xyz).
+
+---
+
+## Keywords
+
+`developer-toolbar`, `vue`, `vue-console`, `mobile-debugging`, `devtools`, `in-app-console`, `debugging`
+

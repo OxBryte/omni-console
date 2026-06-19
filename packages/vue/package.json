@@ -2,6 +2,14 @@
   "name": "@omniconsole/vue",
   "version": "1.0.3",
   "description": "Vue wrapper for OmniConsole",
+  "license": "MIT",
+  "keywords": [
+    "developer-toolbar",
+    "console",
+    "vue",
+    "vue-console",
+    "omniconsole"
+  ],
   "homepage": "https://console.oxbryte.xyz",
   "repository": {
     "type": "git",

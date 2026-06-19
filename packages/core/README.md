@@ -29,3 +29,10 @@ initOmniConsole({
 ```
 
 For detailed configuration options and theme setup, please visit [console.oxbryte.xyz](https://console.oxbryte.xyz).
+
+---
+
+## Keywords
+
+`developer-toolbar`, `in-app-console`, `mobile-debugging`, `web-console`, `devtools`, `debugging`, `network-inspector`, `storage-explorer`
+

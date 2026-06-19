@@ -2,6 +2,17 @@
   "name": "omniconsole",
   "version": "1.0.3",
   "description": "Customizable, in-app developer toolbar (Console, Network, Application)",
+  "license": "MIT",
+  "keywords": [
+    "developer-toolbar",
+    "in-app-console",
+    "console",
+    "network-monitor",
+    "storage-explorer",
+    "debugging",
+    "mobile-debugging",
+    "omniconsole"
+  ],
   "homepage": "https://console.oxbryte.xyz",
   "repository": {
     "type": "git",
