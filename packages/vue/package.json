@@ -1,6 +1,6 @@
 {
   "name": "@omniconsole/vue",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Vue wrapper for OmniConsole",
   "license": "MIT",
   "keywords": [
@@ -29,7 +29,7 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "omniconsole": "^1.0.3",
+    "omniconsole": "^1.0.4",
     "vue": "^3.0.0"
   },
   "devDependencies": {
