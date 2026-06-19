@@ -1,6 +1,6 @@
 {
   "name": "@omniconsole/vue",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Vue wrapper for OmniConsole",
   "homepage": "https://console.oxbryte.xyz",
   "repository": {
@@ -21,7 +21,7 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "omniconsole": "^1.0.2",
+    "omniconsole": "^1.0.3",
     "vue": "^3.0.0"
   },
   "devDependencies": {

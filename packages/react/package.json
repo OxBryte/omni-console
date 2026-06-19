@@ -1,6 +1,6 @@
 {
   "name": "@omniconsole/react",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "React wrapper for OmniConsole",
   "homepage": "https://console.oxbryte.xyz",
   "repository": {
@@ -21,7 +21,7 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "omniconsole": "^1.0.2",
+    "omniconsole": "^1.0.3",
     "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
