@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "omniconsole": "^1.0.4",
-    "@omniconsole/react": "^1.0.4",
+    "omniconsole": "^1.0.5",
+    "@omniconsole/react": "^1.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.0"
